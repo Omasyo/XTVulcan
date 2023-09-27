@@ -1,0 +1,14 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/omaka/Documents/GitHub/XTVulcan/HelloTriangle/build",
+            "binaryPath": "/home/omaka/Documents/GitHub/XTVulcan/HelloTriangle/build/build-debug",
+            "binaryArgs": []
+        },
+        {
+            "cwd": "/home/omaka/Documents/GitHub/XTVulcan/HelloTriangle",
+            "binaryPath": "/home/omaka/Documents/GitHub/XTVulcan/HelloTriangle/build-debug",
+            "binaryArgs": []
+        }
+    ]
+}
