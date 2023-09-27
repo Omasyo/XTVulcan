@@ -10,5 +10,8 @@
             "binaryPath": "/home/omaka/Documents/GitHub/XTVulcan/HelloTriangle/build-debug",
             "binaryArgs": []
         }
-    ]
+    ],
+    "files.associations": {
+        "stdexcept": "cpp"
+    }
 }
