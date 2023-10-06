@@ -1,0 +1,3 @@
+/home/omaka/Documents/GitHub/XTVulcan/build/CMakeFiles/build-debug.dir
+/home/omaka/Documents/GitHub/XTVulcan/build/CMakeFiles/edit_cache.dir
+/home/omaka/Documents/GitHub/XTVulcan/build/CMakeFiles/rebuild_cache.dir

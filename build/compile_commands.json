@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/omaka/Documents/GitHub/XTVulcan/build",
+  "command": "/usr/bin/g++   -g -std=c++17 -o CMakeFiles/build-debug.dir/src/main.cpp.o -c /home/omaka/Documents/GitHub/XTVulcan/src/main.cpp",
+  "file": "/home/omaka/Documents/GitHub/XTVulcan/src/main.cpp",
+  "output": "CMakeFiles/build-debug.dir/src/main.cpp.o"
+}
+]
