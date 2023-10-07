@@ -129,6 +129,43 @@ build-debug/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/build-debug.dir/build.make CMakeFiles/build-debug.dir/build
 .PHONY : build-debug/fast
 
+#=============================================================================
+# Target rules for targets named application
+
+# Build rule for target.
+application: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 application
+.PHONY : application
+
+# fast build rule for target.
+application/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/application.dir/build.make CMakeFiles/application.dir/build
+.PHONY : application/fast
+
+src/application.o: src/application.cpp.o
+.PHONY : src/application.o
+
+# target to build an object file
+src/application.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/application.dir/build.make CMakeFiles/application.dir/src/application.cpp.o
+.PHONY : src/application.cpp.o
+
+src/application.i: src/application.cpp.i
+.PHONY : src/application.i
+
+# target to preprocess a source file
+src/application.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/application.dir/build.make CMakeFiles/application.dir/src/application.cpp.i
+.PHONY : src/application.cpp.i
+
+src/application.s: src/application.cpp.s
+.PHONY : src/application.s
+
+# target to generate assembly for a file
+src/application.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/application.dir/build.make CMakeFiles/application.dir/src/application.cpp.s
+.PHONY : src/application.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -161,7 +198,11 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... application"
 	@echo "... build-debug"
+	@echo "... src/application.o"
+	@echo "... src/application.i"
+	@echo "... src/application.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

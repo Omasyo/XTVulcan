@@ -92,6 +92,7 @@ build__debug_EXTERNAL_OBJECTS =
 
 build-debug: CMakeFiles/build-debug.dir/src/main.cpp.o
 build-debug: CMakeFiles/build-debug.dir/build.make
+build-debug: libapplication.a
 build-debug: CMakeFiles/build-debug.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/omaka/Documents/GitHub/XTVulcan/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable build-debug"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/build-debug.dir/link.txt --verbose=$(VERBOSE)

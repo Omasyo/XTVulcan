@@ -64,6 +64,7 @@ CMAKE_BINARY_DIR = /home/omaka/Documents/GitHub/XTVulcan/build
 
 # The main recursive "all" target.
 all: CMakeFiles/build-debug.dir/all
+all: CMakeFiles/application.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -72,21 +73,22 @@ preinstall:
 
 # The main recursive "clean" target.
 clean: CMakeFiles/build-debug.dir/clean
+clean: CMakeFiles/application.dir/clean
 .PHONY : clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/build-debug.dir
 
 # All Build rule for target.
-CMakeFiles/build-debug.dir/all:
+CMakeFiles/build-debug.dir/all: CMakeFiles/application.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/build-debug.dir/build.make CMakeFiles/build-debug.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/build-debug.dir/build.make CMakeFiles/build-debug.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/omaka/Documents/GitHub/XTVulcan/build/CMakeFiles --progress-num=1,2 "Built target build-debug"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/omaka/Documents/GitHub/XTVulcan/build/CMakeFiles --progress-num=3,4 "Built target build-debug"
 .PHONY : CMakeFiles/build-debug.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/build-debug.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/omaka/Documents/GitHub/XTVulcan/build/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/omaka/Documents/GitHub/XTVulcan/build/CMakeFiles 4
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/build-debug.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/omaka/Documents/GitHub/XTVulcan/build/CMakeFiles 0
 .PHONY : CMakeFiles/build-debug.dir/rule
@@ -99,6 +101,32 @@ build-debug: CMakeFiles/build-debug.dir/rule
 CMakeFiles/build-debug.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/build-debug.dir/build.make CMakeFiles/build-debug.dir/clean
 .PHONY : CMakeFiles/build-debug.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/application.dir
+
+# All Build rule for target.
+CMakeFiles/application.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/application.dir/build.make CMakeFiles/application.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/application.dir/build.make CMakeFiles/application.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/omaka/Documents/GitHub/XTVulcan/build/CMakeFiles --progress-num=1,2 "Built target application"
+.PHONY : CMakeFiles/application.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/application.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/omaka/Documents/GitHub/XTVulcan/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/application.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/omaka/Documents/GitHub/XTVulcan/build/CMakeFiles 0
+.PHONY : CMakeFiles/application.dir/rule
+
+# Convenience name for target.
+application: CMakeFiles/application.dir/rule
+.PHONY : application
+
+# clean rule for target.
+CMakeFiles/application.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/application.dir/build.make CMakeFiles/application.dir/clean
+.PHONY : CMakeFiles/application.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

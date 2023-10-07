@@ -1,10 +1,14 @@
 #include <iostream>
 
-int main (int argc, const char * argv[]) 
+#include "application.hpp"
+
+int main(int argc, const char *argv[])
 {
+    Application app;
+
     try
     {
-        std::cout << "Hello New World\n";
+        app.run();
     }
     catch (const std::exception &e)
     {

@@ -1,7 +1,13 @@
 [
 {
   "directory": "/home/omaka/Documents/GitHub/XTVulcan/build",
-  "command": "/usr/bin/g++   -g -std=c++17 -o CMakeFiles/build-debug.dir/src/main.cpp.o -c /home/omaka/Documents/GitHub/XTVulcan/src/main.cpp",
+  "command": "/usr/bin/g++   -g -std=gnu++20 -o CMakeFiles/application.dir/src/application.cpp.o -c /home/omaka/Documents/GitHub/XTVulcan/src/application.cpp",
+  "file": "/home/omaka/Documents/GitHub/XTVulcan/src/application.cpp",
+  "output": "CMakeFiles/application.dir/src/application.cpp.o"
+},
+{
+  "directory": "/home/omaka/Documents/GitHub/XTVulcan/build",
+  "command": "/usr/bin/g++   -g -std=gnu++20 -o CMakeFiles/build-debug.dir/src/main.cpp.o -c /home/omaka/Documents/GitHub/XTVulcan/src/main.cpp",
   "file": "/home/omaka/Documents/GitHub/XTVulcan/src/main.cpp",
   "output": "CMakeFiles/build-debug.dir/src/main.cpp.o"
 }
