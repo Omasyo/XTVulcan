@@ -221,4 +221,5 @@ CMakeFiles/build-debug.dir/src/main.cpp.o: \
  /usr/include/vulkan/vulkan_handles.hpp \
  /usr/include/vulkan/vulkan_structs.hpp /usr/include/c++/12/cstring \
  /usr/include/string.h /usr/include/strings.h \
- /usr/include/vulkan/vulkan_funcs.hpp
+ /usr/include/vulkan/vulkan_funcs.hpp /usr/include/c++/12/optional \
+ /usr/include/c++/12/bits/enable_special_members.h

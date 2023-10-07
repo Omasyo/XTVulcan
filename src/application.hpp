@@ -5,6 +5,8 @@
 // #include <GLFW/glfw3.h>
 #include <vulkan/vulkan_raii.hpp>
 
+#include <optional>
+
 class GLFWwindow;
 
 const u_int32_t WIDTH = 800;
@@ -18,6 +20,14 @@ const bool enableValidationLayers = false;
 #else
 const bool enableValidationLayers = true;
 #endif
+
+struct QueueFamilyIndices {
+    std::optional<uint32_t> graphicsFamily;
+
+    bool isComplete() {
+        return graphicsFamily.has_value();
+    }
+};
 
 class Application
 {
@@ -57,5 +67,5 @@ private:
 
     vk::raii::DebugUtilsMessengerEXT debugMessenger{nullptr};
 
-    vk::raii::PhysicalDevice device{nullptr};
+    vk::raii::PhysicalDevice physicalDevice{nullptr};
 };

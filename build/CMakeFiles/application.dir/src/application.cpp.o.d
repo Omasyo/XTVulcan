@@ -173,7 +173,9 @@ CMakeFiles/application.dir/src/application.cpp.o: \
  /usr/include/c++/12/bits/enable_special_members.h \
  /usr/include/c++/12/bits/node_handle.h \
  /usr/include/c++/12/bits/unordered_map.h \
- /usr/include/c++/12/bits/erase_if.h \
+ /usr/include/c++/12/bits/erase_if.h /usr/include/c++/12/map \
+ /usr/include/c++/12/bits/stl_tree.h /usr/include/c++/12/bits/stl_map.h \
+ /usr/include/c++/12/bits/stl_multimap.h \
  /home/omaka/Documents/GitHub/XTVulcan/src/application.hpp \
  /usr/include/vulkan/vulkan_raii.hpp /usr/include/c++/12/memory \
  /usr/include/c++/12/bits/stl_uninitialized.h \
@@ -230,4 +232,4 @@ CMakeFiles/application.dir/src/application.cpp.o: \
  /usr/include/c++/12/bits/sstream.tcc \
  /usr/include/vulkan/vulkan_handles.hpp \
  /usr/include/vulkan/vulkan_structs.hpp \
- /usr/include/vulkan/vulkan_funcs.hpp
+ /usr/include/vulkan/vulkan_funcs.hpp /usr/include/c++/12/optional
