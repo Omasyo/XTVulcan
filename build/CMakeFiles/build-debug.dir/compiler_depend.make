@@ -30,6 +30,7 @@ CMakeFiles/build-debug.dir/src/main.cpp.o: /home/omaka/Documents/GitHub/XTVulcan
   /usr/include/c++/12/bits/cpp_type_traits.h \
   /usr/include/c++/12/bits/cxxabi_forced.h \
   /usr/include/c++/12/bits/cxxabi_init_exception.h \
+  /usr/include/c++/12/bits/enable_special_members.h \
   /usr/include/c++/12/bits/exception.h \
   /usr/include/c++/12/bits/exception_defines.h \
   /usr/include/c++/12/bits/exception_ptr.h \
@@ -125,6 +126,7 @@ CMakeFiles/build-debug.dir/src/main.cpp.o: /home/omaka/Documents/GitHub/XTVulcan
   /usr/include/c++/12/memory \
   /usr/include/c++/12/new \
   /usr/include/c++/12/numbers \
+  /usr/include/c++/12/optional \
   /usr/include/c++/12/ostream \
   /usr/include/c++/12/pstl/execution_defs.h \
   /usr/include/c++/12/pstl/glue_algorithm_defs.h \
@@ -305,6 +307,16 @@ CMakeFiles/build-debug.dir/src/main.cpp.o: /home/omaka/Documents/GitHub/XTVulcan
 
 /usr/include/x86_64-linux-gnu/c++/12/bits/c++config.h:
 
+/usr/include/x86_64-linux-gnu/c++/12/bits/c++allocator.h:
+
+/usr/include/c++/12/optional:
+
+/usr/include/c++/12/bits/allocator.h:
+
+/usr/include/c++/12/ostream:
+
+/usr/include/dlfcn.h:
+
 /usr/include/linux/close_range.h:
 
 /usr/include/c++/12/istream:
@@ -447,12 +459,6 @@ CMakeFiles/build-debug.dir/src/main.cpp.o: /home/omaka/Documents/GitHub/XTVulcan
 
 /usr/include/x86_64-linux-gnu/bits/wordsize.h:
 
-/usr/include/c++/12/bits/allocator.h:
-
-/usr/include/c++/12/ostream:
-
-/usr/include/dlfcn.h:
-
 /usr/include/c++/12/bits/atomic_lockfree_defines.h:
 
 /usr/include/vulkan/vulkan.hpp:
@@ -474,6 +480,16 @@ CMakeFiles/build-debug.dir/src/main.cpp.o: /home/omaka/Documents/GitHub/XTVulcan
 /usr/include/c++/12/bits/char_traits.h:
 
 /home/omaka/Documents/GitHub/XTVulcan/src/main.cpp:
+
+/usr/include/c++/12/bits/ranges_cmp.h:
+
+/usr/include/c++/12/bits/locale_facets.tcc:
+
+/usr/include/x86_64-linux-gnu/bits/sched.h:
+
+/usr/include/c++/12/algorithm:
+
+/usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h:
 
 /usr/include/c++/12/bits/hash_bytes.h:
 
@@ -512,16 +528,6 @@ CMakeFiles/build-debug.dir/src/main.cpp.o: /home/omaka/Documents/GitHub/XTVulcan
 /usr/include/x86_64-linux-gnu/bits/cpu-set.h:
 
 /usr/include/assert.h:
-
-/usr/include/c++/12/algorithm:
-
-/usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h:
-
-/usr/include/c++/12/bits/ranges_cmp.h:
-
-/usr/include/c++/12/bits/locale_facets.tcc:
-
-/usr/include/x86_64-linux-gnu/bits/sched.h:
 
 /usr/include/c++/12/bits/vector.tcc:
 
@@ -583,10 +589,6 @@ CMakeFiles/build-debug.dir/src/main.cpp.o: /home/omaka/Documents/GitHub/XTVulcan
 
 /usr/include/c++/12/tuple:
 
-/usr/include/c++/12/pstl/glue_algorithm_defs.h:
-
-/usr/include/c++/12/bits/localefwd.h:
-
 /usr/include/x86_64-linux-gnu/bits/locale.h:
 
 /usr/include/x86_64-linux-gnu/sys/select.h:
@@ -617,6 +619,8 @@ CMakeFiles/build-debug.dir/src/main.cpp.o: /home/omaka/Documents/GitHub/XTVulcan
 
 /usr/include/c++/12/bits/stl_heap.h:
 
+/usr/include/c++/12/bits/enable_special_members.h:
+
 /usr/include/c++/12/bits/ranges_base.h:
 
 /usr/include/c++/12/bits/range_access.h:
@@ -626,6 +630,10 @@ CMakeFiles/build-debug.dir/src/main.cpp.o: /home/omaka/Documents/GitHub/XTVulcan
 /usr/include/vk_video/vulkan_video_codec_h264std_decode.h:
 
 /usr/include/vk_video/vulkan_video_codec_h265std_decode.h:
+
+/usr/include/c++/12/bits/localefwd.h:
+
+/usr/include/c++/12/pstl/glue_algorithm_defs.h:
 
 /usr/include/c++/12/bits/basic_ios.h:
 
@@ -730,8 +738,6 @@ CMakeFiles/build-debug.dir/src/main.cpp.o: /home/omaka/Documents/GitHub/XTVulcan
 /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h:
 
 /usr/include/x86_64-linux-gnu/bits/getopt_core.h:
-
-/usr/include/x86_64-linux-gnu/c++/12/bits/c++allocator.h:
 
 /usr/include/c++/12/type_traits:
 

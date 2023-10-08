@@ -31,6 +31,7 @@ CMakeFiles/build-debug.dir/src/main.cpp.o
  /usr/include/c++/12/bits/cpp_type_traits.h
  /usr/include/c++/12/bits/cxxabi_forced.h
  /usr/include/c++/12/bits/cxxabi_init_exception.h
+ /usr/include/c++/12/bits/enable_special_members.h
  /usr/include/c++/12/bits/exception.h
  /usr/include/c++/12/bits/exception_defines.h
  /usr/include/c++/12/bits/exception_ptr.h
@@ -126,6 +127,7 @@ CMakeFiles/build-debug.dir/src/main.cpp.o
  /usr/include/c++/12/memory
  /usr/include/c++/12/new
  /usr/include/c++/12/numbers
+ /usr/include/c++/12/optional
  /usr/include/c++/12/ostream
  /usr/include/c++/12/pstl/execution_defs.h
  /usr/include/c++/12/pstl/glue_algorithm_defs.h

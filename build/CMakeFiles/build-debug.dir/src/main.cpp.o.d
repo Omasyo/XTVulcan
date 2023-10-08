@@ -153,8 +153,9 @@ CMakeFiles/build-debug.dir/src/main.cpp.o: \
  /usr/include/c++/12/bits/ostream.tcc /usr/include/c++/12/istream \
  /usr/include/c++/12/bits/istream.tcc \
  /home/omaka/Documents/GitHub/XTVulcan/src/application.hpp \
- /usr/include/vulkan/vulkan_raii.hpp /usr/include/c++/12/memory \
- /usr/include/c++/12/bits/stl_uninitialized.h \
+ /usr/include/GLFW/glfw3.h /usr/include/GL/gl.h /usr/include/GL/glext.h \
+ /usr/include/KHR/khrplatform.h /usr/include/vulkan/vulkan_raii.hpp \
+ /usr/include/c++/12/memory /usr/include/c++/12/bits/stl_uninitialized.h \
  /usr/include/c++/12/bits/stl_tempbuf.h \
  /usr/include/c++/12/bits/stl_raw_storage_iter.h \
  /usr/include/c++/12/bits/align.h /usr/include/c++/12/bit \

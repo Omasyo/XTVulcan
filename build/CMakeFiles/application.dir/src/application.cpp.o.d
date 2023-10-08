@@ -1,6 +1,7 @@
 CMakeFiles/application.dir/src/application.cpp.o: \
  /home/omaka/Documents/GitHub/XTVulcan/src/application.cpp \
- /usr/include/stdc-predef.h /usr/include/GLFW/glfw3.h \
+ /usr/include/stdc-predef.h /usr/include/vulkan/vulkan_core.h \
+ /usr/include/vulkan/vk_platform.h \
  /usr/lib/gcc/x86_64-linux-gnu/12/include/stddef.h \
  /usr/lib/gcc/x86_64-linux-gnu/12/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
@@ -16,9 +17,13 @@ CMakeFiles/application.dir/src/application.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/time64.h \
  /usr/include/x86_64-linux-gnu/bits/wchar.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
- /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h /usr/include/GL/gl.h \
- /usr/include/GL/glext.h /usr/include/KHR/khrplatform.h \
- /usr/include/c++/12/iostream \
+ /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
+ /usr/include/vk_video/vulkan_video_codec_h264std.h \
+ /usr/include/vk_video/vulkan_video_codec_h264std_decode.h \
+ /usr/include/vk_video/vulkan_video_codec_h265std.h \
+ /usr/include/vk_video/vulkan_video_codec_h265std_decode.h \
+ /usr/include/GLFW/glfw3.h /usr/include/GL/gl.h /usr/include/GL/glext.h \
+ /usr/include/KHR/khrplatform.h /usr/include/c++/12/iostream \
  /usr/include/x86_64-linux-gnu/c++/12/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/12/bits/os_defines.h \
  /usr/include/x86_64-linux-gnu/c++/12/bits/cpu_defines.h \
@@ -175,7 +180,9 @@ CMakeFiles/application.dir/src/application.cpp.o: \
  /usr/include/c++/12/bits/unordered_map.h \
  /usr/include/c++/12/bits/erase_if.h /usr/include/c++/12/map \
  /usr/include/c++/12/bits/stl_tree.h /usr/include/c++/12/bits/stl_map.h \
- /usr/include/c++/12/bits/stl_multimap.h \
+ /usr/include/c++/12/bits/stl_multimap.h /usr/include/c++/12/set \
+ /usr/include/c++/12/bits/stl_set.h \
+ /usr/include/c++/12/bits/stl_multiset.h /usr/include/c++/12/limits \
  /home/omaka/Documents/GitHub/XTVulcan/src/application.hpp \
  /usr/include/vulkan/vulkan_raii.hpp /usr/include/c++/12/memory \
  /usr/include/c++/12/bits/stl_uninitialized.h \
@@ -216,12 +223,8 @@ CMakeFiles/application.dir/src/application.cpp.o: \
  /usr/include/c++/12/pstl/glue_memory_defs.h /usr/include/c++/12/utility \
  /usr/include/c++/12/bits/stl_relops.h /usr/include/vulkan/vulkan.hpp \
  /usr/include/c++/12/array /usr/include/vulkan/vulkan.h \
- /usr/include/vulkan/vk_platform.h /usr/include/vulkan/vulkan_core.h \
- /usr/include/vk_video/vulkan_video_codec_h264std.h \
- /usr/include/vk_video/vulkan_video_codec_h264std_decode.h \
- /usr/include/vk_video/vulkan_video_codec_h265std.h \
- /usr/include/vk_video/vulkan_video_codec_h265std_decode.h \
- /usr/include/c++/12/vector /usr/include/c++/12/bits/stl_vector.h \
+ /usr/include/vulkan/vulkan_core.h /usr/include/c++/12/vector \
+ /usr/include/c++/12/bits/stl_vector.h \
  /usr/include/c++/12/bits/stl_bvector.h \
  /usr/include/c++/12/bits/vector.tcc /usr/include/c++/12/cassert \
  /usr/include/assert.h /usr/include/dlfcn.h \

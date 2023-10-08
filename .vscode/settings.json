@@ -54,6 +54,7 @@
         "ostream": "cpp",
         "span": "cpp",
         "streambuf": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "map": "cpp"
     }
 }
