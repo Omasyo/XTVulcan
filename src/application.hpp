@@ -12,10 +12,12 @@ const u_int32_t WIDTH = 800;
 const u_int32_t HEIGHT = 600;
 
 const std::vector<const char *> validationLayers = {
-    "VK_LAYER_KHRONOS_validation"};
+    "VK_LAYER_KHRONOS_validation",
+};
 
 const std::vector<const char *> deviceExtensions = {
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+};
 
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
@@ -85,6 +87,14 @@ private:
 
     void createSwapChain();
 
+    void createImageViews();
+
+    void createGraphicsPipeline();
+
+    vk::raii::ShaderModule createShaderModule(const std::vector<char> &code);
+
+    void createRenderPass();
+
     GLFWwindow *window;
 
     vk::raii::Context context;
@@ -103,7 +113,14 @@ private:
     vk::raii::Queue presentQueue{nullptr};
 
     vk::raii::SwapchainKHR swapChain{nullptr};
-    std::vector<vk::Image> swapChainImages; //TODO : I don't need this
+    std::vector<vk::Image> swapChainImages; // TODO : I don't need this
     vk::Format swapChainImageFormat;
     vk::Extent2D swapChainExtent;
+
+    std::vector<vk::raii::ImageView> swapChainImageViews;
+
+    vk::raii::RenderPass renderPass{nullptr};
+    vk::raii::PipelineLayout pipelineLayout{nullptr};
+
+    vk::raii::Pipeline graphicsPipeline{nullptr};
 };

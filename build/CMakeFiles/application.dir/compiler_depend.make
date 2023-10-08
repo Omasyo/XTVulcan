@@ -30,6 +30,7 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
   /usr/include/c++/12/bits/basic_string.tcc \
   /usr/include/c++/12/bits/char_traits.h \
   /usr/include/c++/12/bits/charconv.h \
+  /usr/include/c++/12/bits/codecvt.h \
   /usr/include/c++/12/bits/concept_check.h \
   /usr/include/c++/12/bits/cpp_type_traits.h \
   /usr/include/c++/12/bits/cxxabi_forced.h \
@@ -39,6 +40,7 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
   /usr/include/c++/12/bits/exception.h \
   /usr/include/c++/12/bits/exception_defines.h \
   /usr/include/c++/12/bits/exception_ptr.h \
+  /usr/include/c++/12/bits/fstream.tcc \
   /usr/include/c++/12/bits/functexcept.h \
   /usr/include/c++/12/bits/functional_hash.h \
   /usr/include/c++/12/bits/hash_bytes.h \
@@ -132,6 +134,7 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
   /usr/include/c++/12/ext/numeric_traits.h \
   /usr/include/c++/12/ext/string_conversions.h \
   /usr/include/c++/12/ext/type_traits.h \
+  /usr/include/c++/12/fstream \
   /usr/include/c++/12/initializer_list \
   /usr/include/c++/12/ios \
   /usr/include/c++/12/iosfwd \
@@ -277,8 +280,10 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
   /usr/include/x86_64-linux-gnu/bits/wordsize.h \
   /usr/include/x86_64-linux-gnu/bits/xopen_lim.h \
   /usr/include/x86_64-linux-gnu/c++/12/bits/atomic_word.h \
+  /usr/include/x86_64-linux-gnu/c++/12/bits/basic_file.h \
   /usr/include/x86_64-linux-gnu/c++/12/bits/c++allocator.h \
   /usr/include/x86_64-linux-gnu/c++/12/bits/c++config.h \
+  /usr/include/x86_64-linux-gnu/c++/12/bits/c++io.h \
   /usr/include/x86_64-linux-gnu/c++/12/bits/c++locale.h \
   /usr/include/x86_64-linux-gnu/c++/12/bits/cpu_defines.h \
   /usr/include/x86_64-linux-gnu/c++/12/bits/ctype_base.h \
@@ -323,6 +328,8 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
 
 /usr/include/x86_64-linux-gnu/c++/12/bits/c++locale.h:
 
+/usr/include/x86_64-linux-gnu/c++/12/bits/c++io.h:
+
 /usr/include/x86_64-linux-gnu/c++/12/bits/c++config.h:
 
 /usr/include/x86_64-linux-gnu/c++/12/bits/c++allocator.h:
@@ -346,6 +353,12 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
 /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h:
+
+/usr/include/x86_64-linux-gnu/c++/12/bits/error_constants.h:
+
+/usr/include/x86_64-linux-gnu/c++/12/bits/cpu_defines.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:
 
 /usr/include/c++/12/exception:
 
@@ -387,16 +400,6 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
 
 /usr/include/c++/12/bits/streambuf.tcc:
 
-/usr/include/c++/12/bits/refwrap.h:
-
-/usr/include/x86_64-linux-gnu/bits/time.h:
-
-/usr/include/x86_64-linux-gnu/bits/select.h:
-
-/usr/include/c++/12/bits/stl_uninitialized.h:
-
-/usr/include/string.h:
-
 /usr/include/c++/12/bits/stl_tempbuf.h:
 
 /usr/include/c++/12/bits/stl_multiset.h:
@@ -425,8 +428,6 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
 
 /usr/include/c++/12/bits/stl_algo.h:
 
-/usr/include/c++/12/ext/alloc_traits.h:
-
 /usr/include/c++/12/bits/std_mutex.h:
 
 /usr/include/c++/12/bits/sstream.tcc:
@@ -447,6 +448,12 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
 
 /usr/include/c++/12/pstl/glue_memory_defs.h:
 
+/usr/include/c++/12/bits/refwrap.h:
+
+/usr/include/x86_64-linux-gnu/bits/time.h:
+
+/usr/include/x86_64-linux-gnu/bits/select.h:
+
 /usr/include/c++/12/bits/ranges_uninitialized.h:
 
 /usr/include/x86_64-linux-gnu/sys/cdefs.h:
@@ -465,9 +472,19 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
 
 /usr/include/x86_64-linux-gnu/bits/endian.h:
 
+/usr/include/c++/12/bits/ostream.tcc:
+
+/usr/include/c++/12/string_view:
+
+/usr/include/c++/12/bits/locale_facets.h:
+
 /usr/include/c++/12/bits/basic_string.h:
 
 /usr/include/c++/12/bits/iterator_concepts.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
+
+/usr/include/c++/12/ext/type_traits.h:
 
 /usr/include/c++/12/bits/atomic_lockfree_defines.h:
 
@@ -490,8 +507,6 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
 /usr/include/c++/12/bits/allocator.h:
 
 /usr/include/c++/12/optional:
-
-/usr/include/c++/12/bits/cpp_type_traits.h:
 
 /usr/include/stdlib.h:
 
@@ -557,6 +572,14 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
 
 /usr/include/c++/12/bits/allocated_ptr.h:
 
+/usr/include/c++/12/bits/functexcept.h:
+
+/usr/include/c++/12/bits/stl_set.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
+
+/usr/include/asm-generic/errno-base.h:
+
 /usr/include/syscall.h:
 
 /usr/include/x86_64-linux-gnu/c++/12/bits/gthr-default.h:
@@ -591,6 +614,10 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
 
 /usr/include/alloca.h:
 
+/usr/include/c++/12/bits/cpp_type_traits.h:
+
+/usr/include/c++/12/bits/codecvt.h:
+
 /usr/include/c++/12/bits/stl_iterator_base_types.h:
 
 /usr/include/c++/12/bits/cxxabi_forced.h:
@@ -611,11 +638,21 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
 
 /usr/include/c++/12/bits/exception_ptr.h:
 
+/usr/include/c++/12/bits/stl_uninitialized.h:
+
+/usr/include/string.h:
+
+/usr/include/c++/12/bits/fstream.tcc:
+
 /usr/include/c++/12/bits/stl_multimap.h:
 
 /usr/include/c++/12/bits/stringfwd.h:
 
 /usr/include/c++/12/bits/shared_ptr_base.h:
+
+/usr/include/c++/12/tuple:
+
+/usr/include/c++/12/bits/functional_hash.h:
 
 /usr/include/stdio.h:
 
@@ -637,33 +674,11 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
 
 /usr/include/c++/12/bits/stl_algobase.h:
 
-/usr/include/c++/12/string_view:
-
-/usr/include/c++/12/bits/locale_facets.h:
-
-/usr/include/c++/12/bits/ostream.tcc:
-
-/usr/include/c++/12/bits/functional_hash.h:
-
-/usr/include/c++/12/tuple:
-
 /usr/include/x86_64-linux-gnu/bits/locale.h:
 
 /usr/include/x86_64-linux-gnu/sys/select.h:
 
 /usr/include/c++/12/bits/max_size_type.h:
-
-/usr/include/c++/12/bits/node_handle.h:
-
-/usr/include/c++/12/ext/atomicity.h:
-
-/usr/include/c++/12/string:
-
-/usr/include/strings.h:
-
-/usr/include/c++/12/bit:
-
-/usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
 
 /usr/include/x86_64-linux-gnu/bits/typesizes.h:
 
@@ -681,14 +696,6 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
 
 /usr/include/vulkan/vk_platform.h:
 
-/usr/include/c++/12/bits/functexcept.h:
-
-/usr/include/c++/12/bits/stl_set.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
-
-/usr/include/asm-generic/errno-base.h:
-
 /usr/include/c++/12/bits/stl_tree.h:
 
 /usr/include/c++/12/ios:
@@ -696,6 +703,20 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
 /usr/include/KHR/khrplatform.h:
 
 /usr/include/c++/12/typeinfo:
+
+/usr/include/c++/12/ext/alloc_traits.h:
+
+/usr/include/c++/12/bits/node_handle.h:
+
+/usr/include/c++/12/ext/atomicity.h:
+
+/usr/include/c++/12/string:
+
+/usr/include/strings.h:
+
+/usr/include/c++/12/bit:
+
+/usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
 
 /usr/include/c++/12/pstl/pstl_config.h:
 
@@ -706,6 +727,8 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
 /usr/include/c++/12/bits/alloc_traits.h:
 
 /usr/include/limits.h:
+
+/usr/include/c++/12/fstream:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
 
@@ -839,6 +862,8 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
 
 /usr/include/x86_64-linux-gnu/bits/local_lim.h:
 
+/usr/include/x86_64-linux-gnu/c++/12/bits/basic_file.h:
+
 /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/long-double.h:
@@ -877,22 +902,12 @@ CMakeFiles/application.dir/src/application.cpp.o: /home/omaka/Documents/GitHub/X
 
 /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/error_t.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:
-
-/usr/include/c++/12/ext/type_traits.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
-
-/usr/include/x86_64-linux-gnu/c++/12/bits/error_constants.h:
-
-/usr/include/x86_64-linux-gnu/c++/12/bits/cpu_defines.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:
+/usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h:
 
 /usr/include/c++/12/memory:
 
 /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h:
+/usr/include/x86_64-linux-gnu/bits/types/error_t.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:

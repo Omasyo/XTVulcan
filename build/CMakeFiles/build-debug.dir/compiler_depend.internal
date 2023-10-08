@@ -4,6 +4,10 @@
 CMakeFiles/build-debug.dir/src/main.cpp.o
  /home/omaka/Documents/GitHub/XTVulcan/src/main.cpp
  /home/omaka/Documents/GitHub/XTVulcan/src/application.hpp
+ /usr/include/GL/gl.h
+ /usr/include/GL/glext.h
+ /usr/include/GLFW/glfw3.h
+ /usr/include/KHR/khrplatform.h
  /usr/include/alloca.h
  /usr/include/asm-generic/errno-base.h
  /usr/include/asm-generic/errno.h

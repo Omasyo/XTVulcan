@@ -183,6 +183,10 @@ CMakeFiles/application.dir/src/application.cpp.o: \
  /usr/include/c++/12/bits/stl_multimap.h /usr/include/c++/12/set \
  /usr/include/c++/12/bits/stl_set.h \
  /usr/include/c++/12/bits/stl_multiset.h /usr/include/c++/12/limits \
+ /usr/include/c++/12/fstream /usr/include/c++/12/bits/codecvt.h \
+ /usr/include/x86_64-linux-gnu/c++/12/bits/basic_file.h \
+ /usr/include/x86_64-linux-gnu/c++/12/bits/c++io.h \
+ /usr/include/c++/12/bits/fstream.tcc \
  /home/omaka/Documents/GitHub/XTVulcan/src/application.hpp \
  /usr/include/vulkan/vulkan_raii.hpp /usr/include/c++/12/memory \
  /usr/include/c++/12/bits/stl_uninitialized.h \
