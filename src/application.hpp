@@ -95,6 +95,18 @@ private:
 
     void createRenderPass();
 
+    void createFramebuffers();
+
+    void createCommandPool();
+
+    void createCommandBuffer();
+
+    void recordCommandBuffer(const vk::raii::CommandBuffer& commandBuffer, uint32_t imageIndex);
+
+    void drawFrame();
+
+    void createSyncObjects();
+
     GLFWwindow *window;
 
     vk::raii::Context context;
@@ -123,4 +135,12 @@ private:
     vk::raii::PipelineLayout pipelineLayout{nullptr};
 
     vk::raii::Pipeline graphicsPipeline{nullptr};
+    std::vector<vk::raii::Framebuffer> swapChainFramebuffers;
+
+    vk::raii::CommandPool commandPool{nullptr};
+    vk::raii::CommandBuffers commandBuffers{nullptr};
+
+    vk::raii::Semaphore imageAvailableSemaphore{nullptr};
+    vk::raii::Semaphore  renderFinishedSemaphore{nullptr};
+    vk::raii::Fence inFlightFence{nullptr};
 };

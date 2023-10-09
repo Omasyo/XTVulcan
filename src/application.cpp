@@ -4,15 +4,16 @@
 
 #include <GLFW/glfw3.h>
 
-#include <iostream>
 #include <algorithm>
-#include <cstring>
-#include <unordered_map>
-#include <map>
-#include <set>
+#include <array>
 #include <cstdint>
-#include <limits>
+#include <cstring>
 #include <fstream>
+#include <limits>
+#include <map>
+#include <iostream>
+#include <set>
+#include <unordered_map>
 
 #include "application.hpp"
 
@@ -40,7 +41,7 @@ void populateDebugMessengerCreateInfo(vk::DebugUtilsMessengerCreateInfoEXT &crea
 
     createInfo = vk::DebugUtilsMessengerCreateInfoEXT{
         .sType = vk::StructureType::eDebugUtilsMessengerCreateInfoEXT,
-        .messageSeverity = Severity::eVerbose | Severity::eWarning | Severity::eWarning, // | Severity::eInfo,
+        .messageSeverity = Severity::eVerbose | Severity::eWarning | Severity::eWarning | Severity::eInfo,
         .messageType = MessageType::eGeneral | MessageType::eValidation | MessageType::ePerformance,
         .pfnUserCallback = debugCallback};
 }
@@ -74,6 +75,10 @@ void Application::initVulkan()
     createImageViews();
     createRenderPass();
     createGraphicsPipeline();
+    createFramebuffers();
+    createCommandPool();
+    createCommandBuffer();
+    createSyncObjects();
 }
 
 void Application::mainLoop()
@@ -81,7 +86,9 @@ void Application::mainLoop()
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
+        drawFrame();
     }
+    // device.waitIdle();
 }
 
 void Application::cleanup()
@@ -551,20 +558,6 @@ void Application::createGraphicsPipeline()
         .primitiveRestartEnable = VK_FALSE,
     };
 
-    vk::Viewport viewport{
-        .x = 0.0f,
-        .y = 0.0f,
-        .width = swapChainExtent.width,
-        .height = swapChainExtent.height,
-        .minDepth = 0.0f,
-        .maxDepth = 1.0f,
-    };
-
-    vk::Rect2D scissors{
-        .offset = {0, 0},
-        .extent = swapChainExtent,
-    };
-
     vk::PipelineViewportStateCreateInfo viewportInfo{
         .sType = vk::StructureType::ePipelineViewportStateCreateInfo,
         .viewportCount = 1,
@@ -617,7 +610,7 @@ void Application::createGraphicsPipeline()
 
     pipelineLayout = device.createPipelineLayout(pipelineLayoutInfo);
 
-     vk::GraphicsPipelineCreateInfo pipelineInfo {
+    vk::GraphicsPipelineCreateInfo pipelineInfo{
         .sType = vk::StructureType::eGraphicsPipelineCreateInfo,
         .stageCount = 2,
         .pStages = shaderStages,
@@ -661,7 +654,7 @@ void Application::createRenderPass()
         .finalLayout = vk::ImageLayout::ePresentSrcKHR,
     };
 
-    vk::AttachmentReference colorAttachmentRef {
+    vk::AttachmentReference colorAttachmentRef{
         .attachment = 0,
         .layout = vk::ImageLayout::eColorAttachmentOptimal,
     };
@@ -669,16 +662,212 @@ void Application::createRenderPass()
     vk::SubpassDescription subpass{
         .pipelineBindPoint = vk::PipelineBindPoint::eGraphics,
         .colorAttachmentCount = 1,
-        .pColorAttachments = &colorAttachmentRef
+        .pColorAttachments = &colorAttachmentRef};
+
+    vk::SubpassDependency dependency{
+        .srcSubpass = VK_SUBPASS_EXTERNAL,
+        .dstSubpass = 0,
+        .srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        .dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        .srcAccessMask = vk::AccessFlagBits::eNone,
+        .dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite,
     };
 
-    vk::RenderPassCreateInfo renderPassInfo {
+    vk::RenderPassCreateInfo renderPassInfo{
         .sType = vk::StructureType::eRenderPassCreateInfo,
         .attachmentCount = 1,
         .pAttachments = &colorAttachment,
         .subpassCount = 1,
-        .pSubpasses  = &subpass
+        .pSubpasses = &subpass,
+        .dependencyCount = 1,
+        .pDependencies = &dependency,
+    };
+
+    renderPass = device.createRenderPass(renderPassInfo);
+}
+
+void Application::createFramebuffers()
+{
+    swapChainFramebuffers.clear();
+    for (auto &&imageView : swapChainImageViews)
+    {
+        std::array attachments{
+            *imageView,
+        };
+
+        vk::FramebufferCreateInfo frameBufferInfo{
+            .sType = vk::StructureType::eFramebufferCreateInfo,
+            .renderPass = *renderPass,
+            .attachmentCount = attachments.size(),
+            .pAttachments = attachments.data(),
+            .width = swapChainExtent.width,
+            .height = swapChainExtent.height,
+            .layers = 1,
+        };
+
+        swapChainFramebuffers.push_back(device.createFramebuffer(frameBufferInfo));
+    }
+}
+
+void Application::createCommandPool()
+{
+    auto queueFamilyIndices = findQueueFamilies(physicalDevice);
+
+    vk::CommandPoolCreateInfo poolInfo{
+        .sType = vk::StructureType::eCommandPoolCreateInfo,
+        .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+        .queueFamilyIndex = queueFamilyIndices.graphicsFamily.value(),
+    };
+
+    commandPool = device.createCommandPool(poolInfo);
+}
+
+void Application::createCommandBuffer()
+{
+    vk::CommandBufferAllocateInfo allocateInfo{
+        .sType = vk::StructureType::eCommandBufferAllocateInfo,
+        .commandPool = *commandPool,
+        .level = vk::CommandBufferLevel::ePrimary,
+        .commandBufferCount = 1,
+    };
+
+    // TODO could be vector device.alloca... returns vector ?
+    commandBuffers = vk::raii::CommandBuffers(device, allocateInfo);
+}
+
+void Application::recordCommandBuffer(const vk::raii::CommandBuffer &commandBuffer, uint32_t imageIndex)
+{
+    vk::CommandBufferBeginInfo beginInfo{
+        .sType = vk::StructureType::eCommandBufferBeginInfo,
+    };
+
+    commandBuffer.begin(beginInfo);
+
+    vk::ClearValue clearColor({{{0.0f, 0.0f, 0.0f, 1.0f}}});
+    vk::RenderPassBeginInfo renderPassInfo{
+        .sType = vk::StructureType::eRenderPassBeginInfo,
+        .renderPass = *renderPass,
+        .framebuffer = *swapChainFramebuffers[imageIndex],
+        .renderArea = {
+            .offset = {0, 0},
+            .extent = swapChainExtent,
+        },
+        .clearValueCount = 1,
+        .pClearValues = &clearColor,
+    };
+
+    commandBuffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+
+    commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *graphicsPipeline);
+
+    vk::Viewport viewport{
+        .x = 0.0f,
+        .y = 0.0f,
+        .width = swapChainExtent.width,
+        .height = swapChainExtent.height,
+        .minDepth = 0.0f,
+        .maxDepth = 1.0f,
+    };
+    commandBuffer.setViewport(0, viewport);
+
+    vk::Rect2D scissor{
+        .offset = {0, 0},
+        .extent = swapChainExtent,
+    };
+    commandBuffer.setScissor(0, scissor);
+
+    commandBuffer.draw(3, 1, 0, 0);
+
+    commandBuffer.endRenderPass();
+
+    commandBuffer.end();
+}
+
+void Application::drawFrame()
+{
+    if(device.waitForFences(*inFlightFence, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
+        std::clog << "DrawFrame:\tCould not wait for fences\n";
+    }
+    device.resetFences(*inFlightFence);
+
+    // device.acquireNextImage2KHR({
+    //     .sType = vk::StructureType::eAcquireNextImageInfoKHR,
+    //     .swapchain = *swapChain,
+    //     .timeout = UINT64_MAX,
+    // });
+
+    // TODO: change this
+    uint32_t imageIndex;
+
+    if (vkAcquireNextImageKHR(*device, *swapChain, UINT64_MAX, *imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex) != VK_SUCCESS)
+    {
+        std::clog << "DrawFrame:\tCould not present\n";
+    }
+
+    auto &commandBuffer = commandBuffers.front();
+    commandBuffer.reset();
+
+    recordCommandBuffer(commandBuffer, imageIndex);
+
+    std::array waitSephamores{
+        *imageAvailableSemaphore,
+    };
+    std::array<vk::PipelineStageFlags, waitSephamores.size()> waitStages{
+        vk::PipelineStageFlagBits::eColorAttachmentOutput,
+    };
+    // TODO: assert that their sizes are the same
+    std::array signalSephamores{
+        *renderFinishedSemaphore,
     };
     
-    renderPass = device.createRenderPass(renderPassInfo);
+    vk::CommandBuffer t[commandBuffers.size()];
+    //todo change this
+    for (size_t i = 0; i < commandBuffers.size(); ++i)
+    {
+        t[i] = *commandBuffers[i];
+    }
+    
+
+    vk::SubmitInfo submitInfo{
+        .sType = vk::StructureType::eSubmitInfo,
+        .waitSemaphoreCount = waitSephamores.size(),
+        .pWaitSemaphores = waitSephamores.data(),
+        .pWaitDstStageMask = waitStages.data(),
+        .commandBufferCount = commandBuffers.size(),
+        .pCommandBuffers = t, // I don't know what I'm doing
+        .signalSemaphoreCount = signalSephamores.size(),
+        .pSignalSemaphores = signalSephamores.data(),
+    };
+
+    graphicsQueue.submit(submitInfo, *inFlightFence);
+
+    std::array swapchains = {*swapChain};
+    vk::PresentInfoKHR presentInfo{
+        .sType = vk::StructureType::ePresentInfoKHR,
+        .waitSemaphoreCount = signalSephamores.size(),
+        .pWaitSemaphores = signalSephamores.data(),
+        .swapchainCount = swapchains.size(),
+        .pSwapchains = swapchains.data(),
+        .pImageIndices = &imageIndex};
+
+    if (presentQueue.presentKHR(presentInfo) != vk::Result::eSuccess)
+    {
+        std::clog << "DrawFrame:\tCould not present\n";
+    }
+}
+
+void Application::createSyncObjects()
+{
+
+    imageAvailableSemaphore = device.createSemaphore({
+        .sType = vk::StructureType::eSemaphoreCreateInfo,
+    });
+    renderFinishedSemaphore = device.createSemaphore({
+        .sType = vk::StructureType::eSemaphoreCreateInfo,
+    });
+
+    inFlightFence = device.createFence({
+        .sType = vk::StructureType::eFenceCreateInfo,
+        .flags = vk::FenceCreateFlagBits::eSignaled,
+    });
 }
