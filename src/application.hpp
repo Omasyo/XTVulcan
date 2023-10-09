@@ -57,55 +57,13 @@ private:
 
     void cleanup();
 
-    void createInstance();
-
-    bool checkValidationLayerSupport();
-
-    std::vector<const char *> getRequiredExtensions();
-
-    void setupDebugMessenger();
-
-    void pickPhysicalDevice();
-
-    bool isDeviceSuitable(vk::raii::PhysicalDevice device);
-
-    bool checkDeviceExtensionSupport(vk::raii::PhysicalDevice device);
-
-    QueueFamilyIndices findQueueFamilies(vk::raii::PhysicalDevice device);
-
-    void createLogicalDevice();
-
-    void createSurface();
-
-    SwapChainSupportDetails querySwapChainSupport(vk::raii::PhysicalDevice device);
-
-    vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR> &availableFormats);
-
-    vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR> &availablePresentModes);
-
-    vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR &capabilities);
-
     void createSwapChain();
-
-    void createImageViews();
-
-    void createGraphicsPipeline();
-
-    vk::raii::ShaderModule createShaderModule(const std::vector<char> &code);
-
-    void createRenderPass();
-
-    void createFramebuffers();
-
-    void createCommandPool();
-
-    void createCommandBuffer();
 
     void recordCommandBuffer(const vk::raii::CommandBuffer& commandBuffer, uint32_t imageIndex);
 
     void drawFrame();
 
-    void createSyncObjects();
+    void initSyncObjects();
 
     GLFWwindow *window;
 
@@ -115,7 +73,7 @@ private:
     vk::raii::DebugUtilsMessengerEXT debugMessenger{nullptr};
 
     vk::raii::PhysicalDevice physicalDevice{nullptr};
-    vk::PhysicalDeviceFeatures deviceFeatures;
+    // vk::PhysicalDeviceFeatures deviceFeatures;
     vk::raii::Device device{nullptr};
 
     vk::raii::Queue graphicsQueue{nullptr};
@@ -128,11 +86,10 @@ private:
     std::vector<vk::Image> swapChainImages; // TODO : I don't need this
     vk::Format swapChainImageFormat;
     vk::Extent2D swapChainExtent;
-
     std::vector<vk::raii::ImageView> swapChainImageViews;
 
     vk::raii::RenderPass renderPass{nullptr};
-    vk::raii::PipelineLayout pipelineLayout{nullptr};
+    // vk::raii::PipelineLayout pipelineLayout{nullptr};
 
     vk::raii::Pipeline graphicsPipeline{nullptr};
     std::vector<vk::raii::Framebuffer> swapChainFramebuffers;
