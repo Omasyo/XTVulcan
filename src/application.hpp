@@ -57,7 +57,7 @@ private:
 
     void cleanup();
 
-    void createSwapChain();
+    // void createSwapChain(const vk::SurfaceFormatKHR &surfaceFormat);
 
     void recordCommandBuffer(const vk::raii::CommandBuffer& commandBuffer, uint32_t imageIndex);
 
@@ -82,9 +82,9 @@ private:
 
     vk::raii::Queue presentQueue{nullptr};
 
-    vk::raii::SwapchainKHR swapChain{nullptr};
-    std::vector<vk::Image> swapChainImages; // TODO : I don't need this
-    vk::Format swapChainImageFormat;
+    vk::raii::SwapchainKHR swapchain{nullptr};
+    // std::vector<vk::Image> swapChainImages; // TODO : I don't need this
+    // vk::Format swapchainImageFormat;
     vk::Extent2D swapChainExtent;
     std::vector<vk::raii::ImageView> swapChainImageViews;
 
