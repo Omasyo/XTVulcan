@@ -1,5 +1,3 @@
-// #include <vulkan/vulkan_raii.hpp>
-
 #include <vulkan/vulkan_core.h> //TODO: Not sure why this isn't added in raii, since it looks like it's actually there
 
 #include <GLFW/glfw3.h>
@@ -67,13 +65,12 @@ bool checkValidationLayerSupport()
     auto availableLayers = vk::enumerateInstanceLayerProperties();
     for (auto layer : validationLayers)
     {
-        std::cout << '\t' << "Checking for layer " << layer << std::endl;
         if (std::ranges::find_if(availableLayers,
                                  [layer](auto properties)
                                  { return strcmp(layer, properties.layerName) == 0; }) ==
             availableLayers.cend())
         {
-            std::cout << '\t' << layer << " not found" << std::endl;
+            std::cerr << '\t' << layer << " not found" << std::endl;
             return false;
         }
     }
@@ -246,8 +243,6 @@ vk::raii::PhysicalDevice pickPhysicalDevice(const vk::raii::Instance &instance, 
 
 vk::raii::Device createLogicalDevice(const vk::raii::PhysicalDevice &physicalDevice, const QueueFamilyIndices &indices)
 {
-    // auto indices = findQueueFamilies(physicalDevice, surface);
-
     std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
     std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
     queueCreateInfos.reserve(uniqueQueueFamilies.size());
@@ -328,7 +323,6 @@ vk::Extent2D chooseSwapExtent(GLFWwindow *const window, const vk::SurfaceCapabil
 }
 
 vk::raii::SwapchainKHR createSwapChain(
-    // GLFWwindow *const window,
     const vk::raii::Device &device,
     const vk::raii::SurfaceKHR &surface,
     const vk::SurfaceFormatKHR &surfaceFormat,
@@ -349,7 +343,6 @@ vk::raii::SwapchainKHR createSwapChain(
         .imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
     };
 
-    // auto indices = findQueueFamilies(physicalDevice, surface);
     std::array queueFamilyIndices{indices.graphicsFamily.value(), indices.presentFamily.value()};
 
     if (indices.graphicsFamily != indices.presentFamily)
@@ -634,8 +627,6 @@ vk::raii::CommandPool createCommandPool(
     const vk::raii::Device &device,
     const QueueFamilyIndices &queueFamilyIndices)
 {
-    // auto queueFamilyIndices = findQueueFamilies(physicalDevice, surface);
-
     vk::CommandPoolCreateInfo poolInfo{
         .sType = vk::StructureType::eCommandPoolCreateInfo,
         .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
@@ -695,7 +686,6 @@ void Application::initVulkan()
     swapChainExtent = chooseSwapExtent(window, swapChainSupport.capabilities);
 
     swapchain = createSwapChain(device, surface, surfaceFormat, swapChainExtent, swapChainSupport, indices);
-
 
     swapChainImageViews = createImageViews(device, swapchain.getImages(), surfaceFormat.format);
     renderPass = createRenderPass(device, surfaceFormat.format);
@@ -776,22 +766,15 @@ void Application::drawFrame()
 {
     if (device.waitForFences(*inFlightFence, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess)
     {
-        std::clog << "DrawFrame:\tCould not wait for fences\n";
+        std::cerr << "DrawFrame:\tCould not wait for fences\n";
     }
     device.resetFences(*inFlightFence);
 
-    // device.acquireNextImage2KHR({
-    //     .sType = vk::StructureType::eAcquireNextImageInfoKHR,
-    //     .swapchain = *swapChain,
-    //     .timeout = UINT64_MAX,
-    // });
+    auto [result, imageIndex] = swapchain.acquireNextImage(UINT64_MAX, *imageAvailableSemaphore);
 
-    // TODO: change this
-    uint32_t imageIndex;
-
-    if (vkAcquireNextImageKHR(*device, *swapchain, UINT64_MAX, *imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex) != VK_SUCCESS)
+    if (enableValidationLayers && result != vk::Result::eSuccess)
     {
-        std::clog << "DrawFrame:\tCould not present\n";
+        std::cerr << "DrawFrame:\tCould not present:\t" << result << std::endl;
     }
 
     auto &commandBuffer = commandBuffers.front();
@@ -839,15 +822,14 @@ void Application::drawFrame()
         .pSwapchains = swapchains.data(),
         .pImageIndices = &imageIndex};
 
-    if (presentQueue.presentKHR(presentInfo) != vk::Result::eSuccess)
+    if (presentQueue.presentKHR(presentInfo) != vk::Result::eSuccess && enableValidationLayers)
     {
-        std::clog << "DrawFrame:\tCould not present\n";
+        std::cerr << "DrawFrame:\tCould not present\t";
     }
 }
 
 void Application::initSyncObjects()
 {
-
     imageAvailableSemaphore = device.createSemaphore({
         .sType = vk::StructureType::eSemaphoreCreateInfo,
     });

@@ -57,8 +57,6 @@ private:
 
     void cleanup();
 
-    // void createSwapChain(const vk::SurfaceFormatKHR &surfaceFormat);
-
     void recordCommandBuffer(const vk::raii::CommandBuffer& commandBuffer, uint32_t imageIndex);
 
     void drawFrame();
@@ -73,7 +71,6 @@ private:
     vk::raii::DebugUtilsMessengerEXT debugMessenger{nullptr};
 
     vk::raii::PhysicalDevice physicalDevice{nullptr};
-    // vk::PhysicalDeviceFeatures deviceFeatures;
     vk::raii::Device device{nullptr};
 
     vk::raii::Queue graphicsQueue{nullptr};
