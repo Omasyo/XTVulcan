@@ -315,6 +315,8 @@ vk::Extent2D chooseSwapExtent(GLFWwindow *const window, const vk::SurfaceCapabil
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
 
+        std::clog << width << " " << height << std::endl;
+
         return vk::Extent2D{
             .width = std::clamp(static_cast<uint32_t>(width), capabilities.minImageExtent.width, capabilities.maxImageExtent.width),
             .height = std::clamp(static_cast<uint32_t>(height), capabilities.minImageExtent.height, capabilities.maxImageExtent.height),
@@ -636,13 +638,13 @@ vk::raii::CommandPool createCommandPool(
     return device.createCommandPool(poolInfo);
 }
 
-vk::raii::CommandBuffers createCommandBuffer(const vk::raii::Device &device, const vk::raii::CommandPool &commandPool)
+vk::raii::CommandBuffers createCommandBuffers(const vk::raii::Device &device, const vk::raii::CommandPool &commandPool)
 {
     vk::CommandBufferAllocateInfo allocateInfo{
         .sType = vk::StructureType::eCommandBufferAllocateInfo,
         .commandPool = *commandPool,
         .level = vk::CommandBufferLevel::ePrimary,
-        .commandBufferCount = 1,
+        .commandBufferCount = MAX_FRAMES_IN_FLIGHT,
     };
 
     // TODO could be vector device.alloca... returns vector ?
@@ -674,7 +676,7 @@ void Application::initVulkan()
     surface = createSurface(instance, window);
     physicalDevice = pickPhysicalDevice(instance, surface);
 
-    auto indices = findQueueFamilies(physicalDevice, surface);
+    /*auto*/ indices = findQueueFamilies(physicalDevice, surface);
 
     device = createLogicalDevice(physicalDevice, indices);
 
@@ -683,26 +685,29 @@ void Application::initVulkan()
 
     auto swapChainSupport = querySwapChainSupport(physicalDevice, surface);
     auto surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-    swapChainExtent = chooseSwapExtent(window, swapChainSupport.capabilities);
+    swapchainExtent = chooseSwapExtent(window, swapChainSupport.capabilities);
 
-    swapchain = createSwapChain(device, surface, surfaceFormat, swapChainExtent, swapChainSupport, indices);
+    swapchain = createSwapChain(device, surface, surfaceFormat, swapchainExtent, swapChainSupport, indices);
 
     swapChainImageViews = createImageViews(device, swapchain.getImages(), surfaceFormat.format);
     renderPass = createRenderPass(device, surfaceFormat.format);
     graphicsPipeline = createGraphicsPipeline(device, renderPass);
-    swapChainFramebuffers = createFramebuffers(device, swapChainImageViews, renderPass, swapChainExtent);
+    swapChainFramebuffers = createFramebuffers(device, swapChainImageViews, renderPass, swapchainExtent);
     commandPool = createCommandPool(device, indices);
-    commandBuffers = createCommandBuffer(device, commandPool);
+    commandBuffers = createCommandBuffers(device, commandPool);
 
     initSyncObjects();
 }
 
 void Application::mainLoop()
 {
+    uint32_t currentFrame = 0;
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-        drawFrame();
+        drawFrame(currentFrame);
+
+        currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
     // device.waitIdle();
 }
@@ -729,7 +734,7 @@ void Application::recordCommandBuffer(const vk::raii::CommandBuffer &commandBuff
         .framebuffer = *swapChainFramebuffers[imageIndex],
         .renderArea = {
             .offset = {0, 0},
-            .extent = swapChainExtent,
+            .extent = swapchainExtent,
         },
         .clearValueCount = 1,
         .pClearValues = &clearColor,
@@ -742,8 +747,8 @@ void Application::recordCommandBuffer(const vk::raii::CommandBuffer &commandBuff
     vk::Viewport viewport{
         .x = 0.0f,
         .y = 0.0f,
-        .width = static_cast<float>(swapChainExtent.width),
-        .height = static_cast<float>(swapChainExtent.height),
+        .width = static_cast<float>(swapchainExtent.width),
+        .height = static_cast<float>(swapchainExtent.height),
         .minDepth = 0.0f,
         .maxDepth = 1.0f,
     };
@@ -751,7 +756,7 @@ void Application::recordCommandBuffer(const vk::raii::CommandBuffer &commandBuff
 
     vk::Rect2D scissor{
         .offset = {0, 0},
-        .extent = swapChainExtent,
+        .extent = swapchainExtent,
     };
     commandBuffer.setScissor(0, scissor);
 
@@ -762,51 +767,49 @@ void Application::recordCommandBuffer(const vk::raii::CommandBuffer &commandBuff
     commandBuffer.end();
 }
 
-void Application::drawFrame()
+void Application::drawFrame(uint32_t currentFrame)
 {
+    auto &imageAvailableSemaphore = imageAvailableSemaphores[currentFrame];
+    auto &renderFinishedSemaphore = renderFinishedSemaphores[currentFrame];
+    auto &inFlightFence = inFlightFences[currentFrame];
+    auto &commandBuffer = commandBuffers[currentFrame];
+
     if (device.waitForFences(*inFlightFence, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess)
     {
         std::cerr << "DrawFrame:\tCould not wait for fences\n";
     }
-    device.resetFences(*inFlightFence);
 
     auto [result, imageIndex] = swapchain.acquireNextImage(UINT64_MAX, *imageAvailableSemaphore);
 
-    if (enableValidationLayers && result != vk::Result::eSuccess)
+    if (result == vk::Result::eErrorOutOfDateKHR)
     {
-        std::cerr << "DrawFrame:\tCould not present:\t" << result << std::endl;
+        recreateSwapchain();
+        return;
+    }
+    else if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR)
+    {
+        throw std::runtime_error("failed to acquire swap chain image!");
     }
 
-    auto &commandBuffer = commandBuffers.front();
-    commandBuffer.reset();
+    device.resetFences(*inFlightFence);
 
+    commandBuffer.reset();
     recordCommandBuffer(commandBuffer, imageIndex);
 
-    std::array waitSephamores{
-        *imageAvailableSemaphore,
-    };
-    std::array<vk::PipelineStageFlags, waitSephamores.size()> waitStages{
-        vk::PipelineStageFlagBits::eColorAttachmentOutput,
-    };
+    std::array waitSephamores{*imageAvailableSemaphore};
+    std::array<vk::PipelineStageFlags, waitSephamores.size()> waitStages{vk::PipelineStageFlagBits::eColorAttachmentOutput};
     // TODO: assert that their sizes are the same
     std::array signalSephamores{
         *renderFinishedSemaphore,
     };
-
-    vk::CommandBuffer t[commandBuffers.size()];
-    // todo change this
-    for (size_t i = 0; i < commandBuffers.size(); ++i)
-    {
-        t[i] = *commandBuffers[i];
-    }
 
     vk::SubmitInfo submitInfo{
         .sType = vk::StructureType::eSubmitInfo,
         .waitSemaphoreCount = waitSephamores.size(),
         .pWaitSemaphores = waitSephamores.data(),
         .pWaitDstStageMask = waitStages.data(),
-        .commandBufferCount = static_cast<uint32_t>(commandBuffers.size()),
-        .pCommandBuffers = t, // TODO I don't know what I'm doing
+        .commandBufferCount = 1,
+        .pCommandBuffers = &*commandBuffer,
         .signalSemaphoreCount = signalSephamores.size(),
         .pSignalSemaphores = signalSephamores.data(),
     };
@@ -822,23 +825,58 @@ void Application::drawFrame()
         .pSwapchains = swapchains.data(),
         .pImageIndices = &imageIndex};
 
-    if (presentQueue.presentKHR(presentInfo) != vk::Result::eSuccess && enableValidationLayers)
+    result = presentQueue.presentKHR(presentInfo);
+    if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
     {
-        std::cerr << "DrawFrame:\tCould not present\t";
+        recreateSwapchain();
+    }
+    else if (result != vk::Result::eSuccess)
+    {
+        throw std::runtime_error("failed to present swap chain image!");
     }
 }
 
 void Application::initSyncObjects()
 {
-    imageAvailableSemaphore = device.createSemaphore({
-        .sType = vk::StructureType::eSemaphoreCreateInfo,
-    });
-    renderFinishedSemaphore = device.createSemaphore({
-        .sType = vk::StructureType::eSemaphoreCreateInfo,
-    });
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        imageAvailableSemaphores.push_back(device.createSemaphore({
+            .sType = vk::StructureType::eSemaphoreCreateInfo,
+        }));
+        renderFinishedSemaphores.push_back(device.createSemaphore({
+            .sType = vk::StructureType::eSemaphoreCreateInfo,
+        }));
 
-    inFlightFence = device.createFence({
-        .sType = vk::StructureType::eFenceCreateInfo,
-        .flags = vk::FenceCreateFlagBits::eSignaled,
-    });
+        inFlightFences.push_back(device.createFence({
+            .sType = vk::StructureType::eFenceCreateInfo,
+            .flags = vk::FenceCreateFlagBits::eSignaled,
+        }));
+    }
+}
+
+void Application::recreateSwapchain()
+{
+    device.waitIdle();
+
+    //    swapchain.clear();
+    //    for (auto &&views : swapChainImageViews)
+    //    {
+    //     views.clear();
+    //    }
+    //    for (auto &&buffers : swapChainFramebuffers)
+    //    {
+    //     buffers.clear();
+    //    }
+
+    auto swapChainSupport = querySwapChainSupport(physicalDevice, surface);
+
+    auto surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
+    swapchainExtent = chooseSwapExtent(window, swapChainSupport.capabilities);
+
+    //  std::clog << swapchainExtent.width << " " << swapchainExtent.height << std::endl;
+
+    swapchain = createSwapChain(device, surface, surfaceFormat, swapchainExtent, swapChainSupport, indices);
+
+    swapChainImageViews = createImageViews(device, swapchain.getImages(), surfaceFormat.format);
+    swapChainFramebuffers = createFramebuffers(device, swapChainImageViews, renderPass, swapchainExtent);
 }

@@ -11,6 +11,8 @@
 const u_int32_t WIDTH = 800;
 const u_int32_t HEIGHT = 600;
 
+const int MAX_FRAMES_IN_FLIGHT = 2;
+
 const std::vector<const char *> validationLayers = {
     "VK_LAYER_KHRONOS_validation",
 };
@@ -59,7 +61,9 @@ private:
 
     void recordCommandBuffer(const vk::raii::CommandBuffer& commandBuffer, uint32_t imageIndex);
 
-    void drawFrame();
+    void recreateSwapchain();
+
+    void drawFrame(uint32_t currentFrame);
 
     void initSyncObjects();
 
@@ -80,13 +84,15 @@ private:
     vk::raii::Queue presentQueue{nullptr};
 
     vk::raii::SwapchainKHR swapchain{nullptr};
-    // std::vector<vk::Image> swapChainImages; // TODO : I don't need this
     // vk::Format swapchainImageFormat;
-    vk::Extent2D swapChainExtent;
+    // vk::SurfaceFormatKHR surfaceFormat;
+    // SwapChainSupportDetails swapChainSupport;
+    vk::Extent2D swapchainExtent;
     std::vector<vk::raii::ImageView> swapChainImageViews;
 
+    QueueFamilyIndices indices;
+
     vk::raii::RenderPass renderPass{nullptr};
-    // vk::raii::PipelineLayout pipelineLayout{nullptr};
 
     vk::raii::Pipeline graphicsPipeline{nullptr};
     std::vector<vk::raii::Framebuffer> swapChainFramebuffers;
@@ -94,7 +100,9 @@ private:
     vk::raii::CommandPool commandPool{nullptr};
     vk::raii::CommandBuffers commandBuffers{nullptr};
 
-    vk::raii::Semaphore imageAvailableSemaphore{nullptr};
-    vk::raii::Semaphore  renderFinishedSemaphore{nullptr};
-    vk::raii::Fence inFlightFence{nullptr};
+    std::vector<vk::raii::Semaphore> imageAvailableSemaphores;
+    std::vector<vk::raii::Semaphore>  renderFinishedSemaphores;
+    std::vector<vk::raii::Fence> inFlightFences;
+
+    // uint32_t currentFrame = 0;
 };

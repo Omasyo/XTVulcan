@@ -4,6 +4,11 @@
             "cwd": "/home/omaka/Documents/GitHub/XTVulcan/HelloTriangle",
             "binaryPath": "/home/omaka/Documents/GitHub/XTVulcan/HelloTriangle/build/build-debug",
             "binaryArgs": []
+        },
+        {
+            "cwd": "/home/omaka/Documents/GitHub/XTVulcan/reference/build",
+            "binaryPath": "/home/omaka/Documents/GitHub/XTVulcan/reference/build/build-debug",
+            "binaryArgs": []
         }
     ],
     "files.associations": {
