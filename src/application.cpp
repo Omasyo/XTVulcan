@@ -133,32 +133,6 @@ vk::raii::SurfaceKHR createSurface(const vk::raii::Instance &instance, GLFWwindo
     return vk::raii::SurfaceKHR(instance, surfaceHandle);
 }
 
-int rateDeviceSuitability(const vk::raii::PhysicalDevice &device)
-{
-
-    auto deviceProperties = device.getProperties();
-    auto deviceFeatures = device.getFeatures();
-
-    int score = 0;
-
-    // Discrete GPUs have a significant performance advantage
-    if (deviceProperties.deviceType == vk::PhysicalDeviceType::eDiscreteGpu)
-    {
-        score += 1000;
-    }
-
-    // Maximum possible size of textures affects graphics quality
-    score += deviceProperties.limits.maxImageDimension2D;
-
-    // Application can't function without geometry shaders
-    if (!deviceFeatures.geometryShader)
-    {
-        return 0;
-    }
-
-    return score;
-}
-
 QueueFamilyIndices findQueueFamilies(const vk::raii::PhysicalDevice &device, const vk::raii::SurfaceKHR &surface)
 {
     QueueFamilyIndices indices;
@@ -189,6 +163,41 @@ QueueFamilyIndices findQueueFamilies(const vk::raii::PhysicalDevice &device, con
     return indices;
 }
 
+SwapChainSupportDetails querySwapChainSupport(const vk::raii::PhysicalDevice &device, const vk::raii::SurfaceKHR &surface)
+{
+    return SwapChainSupportDetails{
+        .capabilities = device.getSurfaceCapabilitiesKHR(*surface),
+        .formats = device.getSurfaceFormatsKHR(*surface),
+        .presentModes = device.getSurfacePresentModesKHR(*surface),
+    };
+}
+
+int rateDeviceSuitability(const vk::raii::PhysicalDevice &device)
+{
+
+    auto deviceProperties = device.getProperties();
+    auto deviceFeatures = device.getFeatures();
+
+    int score = 0;
+
+    // Discrete GPUs have a significant performance advantage
+    if (deviceProperties.deviceType == vk::PhysicalDeviceType::eDiscreteGpu)
+    {
+        score += 1000;
+    }
+
+    // Maximum possible size of textures affects graphics quality
+    score += deviceProperties.limits.maxImageDimension2D;
+
+    // Application can't function without geometry shaders
+    if (!deviceFeatures.geometryShader)
+    {
+        return 0;
+    }
+
+    return score;
+}
+
 bool checkDeviceExtensionSupport(const vk::raii::PhysicalDevice &device)
 {
     std::set<std::string> requiredExtensions(deviceExtensions.cbegin(), deviceExtensions.cend());
@@ -199,16 +208,6 @@ bool checkDeviceExtensionSupport(const vk::raii::PhysicalDevice &device)
     }
 
     return requiredExtensions.empty();
-}
-
-SwapChainSupportDetails querySwapChainSupport(const vk::raii::PhysicalDevice &device, const vk::raii::SurfaceKHR &surface)
-{
-
-    return SwapChainSupportDetails{
-        .capabilities = device.getSurfaceCapabilitiesKHR(*surface),
-        .formats = device.getSurfaceFormatsKHR(*surface),
-        .presentModes = device.getSurfacePresentModesKHR(*surface),
-    };
 }
 
 bool isDeviceSuitable(const vk::raii::PhysicalDevice &device, const vk::raii::SurfaceKHR &surface)
@@ -245,12 +244,13 @@ vk::raii::PhysicalDevice pickPhysicalDevice(const vk::raii::Instance &instance, 
     throw std::runtime_error("failed to find a suitable GPU!");
 }
 
-vk::raii::Device createLogicalDevice(const vk::raii::PhysicalDevice &physicalDevice, const vk::raii::SurfaceKHR &surface)
+vk::raii::Device createLogicalDevice(const vk::raii::PhysicalDevice &physicalDevice, const QueueFamilyIndices &indices)
 {
-    auto indices = findQueueFamilies(physicalDevice, surface);
+    // auto indices = findQueueFamilies(physicalDevice, surface);
 
-    std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
     std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
+    std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
+    queueCreateInfos.reserve(uniqueQueueFamilies.size());
 
     float queryPriority = 1.0f;
     for (auto queueFamily : uniqueQueueFamilies)
@@ -328,21 +328,20 @@ vk::Extent2D chooseSwapExtent(GLFWwindow *const window, const vk::SurfaceCapabil
 }
 
 vk::raii::SwapchainKHR createSwapChain(
-    GLFWwindow *const window,
+    // GLFWwindow *const window,
     const vk::raii::Device &device,
+    const vk::raii::SurfaceKHR &surface,
     const vk::SurfaceFormatKHR &surfaceFormat,
-    const vk::raii::PhysicalDevice &physicalDevice,
-    const vk::raii::SurfaceKHR &surface)
+    const vk::Extent2D &extent,
+    const SwapChainSupportDetails &swapchainSupport,
+    const QueueFamilyIndices &indices)
 {
-    auto swapChainSupport = querySwapChainSupport(physicalDevice, surface);
-
-    auto presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-    auto extent = chooseSwapExtent(window, swapChainSupport.capabilities);
+    auto presentMode = chooseSwapPresentMode(swapchainSupport.presentModes);
 
     vk::SwapchainCreateInfoKHR createInfo{
         .sType = vk::StructureType::eSwapchainCreateInfoKHR,
         .surface = *surface,
-        .minImageCount = std::min(swapChainSupport.capabilities.minImageCount + 1, swapChainSupport.capabilities.maxImageCount), // TODO can maxCOunt be < 0
+        .minImageCount = std::min(swapchainSupport.capabilities.minImageCount + 1, swapchainSupport.capabilities.maxImageCount), // TODO can maxCOunt be < 0
         .imageFormat = surfaceFormat.format,
         .imageColorSpace = surfaceFormat.colorSpace,
         .imageExtent = extent,
@@ -350,21 +349,21 @@ vk::raii::SwapchainKHR createSwapChain(
         .imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
     };
 
-    auto indices = findQueueFamilies(physicalDevice, surface);
-    uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
+    // auto indices = findQueueFamilies(physicalDevice, surface);
+    std::array queueFamilyIndices{indices.graphicsFamily.value(), indices.presentFamily.value()};
 
     if (indices.graphicsFamily != indices.presentFamily)
     {
         createInfo.setImageSharingMode(vk::SharingMode::eConcurrent)
-            .setQueueFamilyIndexCount(2)
-            .setPQueueFamilyIndices(queueFamilyIndices);
+            .setQueueFamilyIndexCount(queueFamilyIndices.size())
+            .setPQueueFamilyIndices(queueFamilyIndices.data());
     }
     else
     {
         createInfo.setImageSharingMode(vk::SharingMode::eExclusive);
     }
 
-    createInfo.setPreTransform(swapChainSupport.capabilities.currentTransform)
+    createInfo.setPreTransform(swapchainSupport.capabilities.currentTransform)
         .setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
         .setPresentMode(presentMode)
         .setClipped(VK_TRUE)
@@ -373,11 +372,13 @@ vk::raii::SwapchainKHR createSwapChain(
     return device.createSwapchainKHR(createInfo);
 }
 
-std::vector<vk::raii::ImageView> createImageViews(const vk::raii::Device &device,
-                                                  const std::vector<vk::Image> &swapchainImages,
-                                                  const vk::Format &swapchainImageFormat)
+std::vector<vk::raii::ImageView> createImageViews(
+    const vk::raii::Device &device,
+    const std::vector<vk::Image> &swapchainImages,
+    const vk::Format &swapchainImageFormat)
 {
     std::vector<vk::raii::ImageView> imageViews;
+    imageViews.reserve(swapchainImages.size());
     for (auto &&image : swapchainImages)
     {
         vk::ImageViewCreateInfo createInfo{
@@ -607,6 +608,7 @@ std::vector<vk::raii::Framebuffer> createFramebuffers(
     const vk::Extent2D &swapchainExtent)
 {
     std::vector<vk::raii::Framebuffer> buffers;
+    buffers.reserve(swapchainImageViews.size());
     for (auto &&imageView : swapchainImageViews)
     {
         std::array attachments{
@@ -630,10 +632,9 @@ std::vector<vk::raii::Framebuffer> createFramebuffers(
 
 vk::raii::CommandPool createCommandPool(
     const vk::raii::Device &device,
-    const vk::raii::PhysicalDevice &physicalDevice,
-    const vk::raii::SurfaceKHR &surface)
+    const QueueFamilyIndices &queueFamilyIndices)
 {
-    auto queueFamilyIndices = findQueueFamilies(physicalDevice, surface);
+    // auto queueFamilyIndices = findQueueFamilies(physicalDevice, surface);
 
     vk::CommandPoolCreateInfo poolInfo{
         .sType = vk::StructureType::eCommandPoolCreateInfo,
@@ -681,9 +682,11 @@ void Application::initVulkan()
     debugMessenger = createDebugMessenger(instance);
     surface = createSurface(instance, window);
     physicalDevice = pickPhysicalDevice(instance, surface);
-    device = createLogicalDevice(physicalDevice, surface);
 
     auto indices = findQueueFamilies(physicalDevice, surface);
+
+    device = createLogicalDevice(physicalDevice, indices);
+
     graphicsQueue = device.getQueue(indices.graphicsFamily.value(), 0);
     presentQueue = device.getQueue(indices.presentFamily.value(), 0);
 
@@ -691,15 +694,14 @@ void Application::initVulkan()
     auto surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     swapChainExtent = chooseSwapExtent(window, swapChainSupport.capabilities);
 
-    swapchain = createSwapChain(window, device, surfaceFormat, physicalDevice, surface);
+    swapchain = createSwapChain(device, surface, surfaceFormat, swapChainExtent, swapChainSupport, indices);
 
-    auto swapchainImageFormat = surfaceFormat.format;
 
-    swapChainImageViews = createImageViews(device, swapchain.getImages(), swapchainImageFormat);
-    renderPass = createRenderPass(device, swapchainImageFormat);
+    swapChainImageViews = createImageViews(device, swapchain.getImages(), surfaceFormat.format);
+    renderPass = createRenderPass(device, surfaceFormat.format);
     graphicsPipeline = createGraphicsPipeline(device, renderPass);
     swapChainFramebuffers = createFramebuffers(device, swapChainImageViews, renderPass, swapChainExtent);
-    commandPool = createCommandPool(device, physicalDevice, surface);
+    commandPool = createCommandPool(device, indices);
     commandBuffers = createCommandBuffer(device, commandPool);
 
     initSyncObjects();
