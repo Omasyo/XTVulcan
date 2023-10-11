@@ -469,8 +469,15 @@ vk::raii::Pipeline createGraphicsPipeline(const vk::raii::Device &device, const 
         .pDynamicStates = dynamicStates.data(),
     };
 
+    auto bindingDescription = Vertex::getBindingDescription();
+    auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
     vk::PipelineVertexInputStateCreateInfo vertexInputInfo{
         .sType = vk::StructureType::ePipelineVertexInputStateCreateInfo,
+        .vertexBindingDescriptionCount = 1,
+        .pVertexBindingDescriptions = &bindingDescription,
+        .vertexAttributeDescriptionCount = attributeDescriptions.size(),
+        .pVertexAttributeDescriptions = attributeDescriptions.data(),
     };
 
     vk::PipelineInputAssemblyStateCreateInfo inputAssemblyInfo{
@@ -596,6 +603,51 @@ vk::raii::RenderPass createRenderPass(const vk::raii::Device &device, const vk::
     return device.createRenderPass(renderPassInfo);
 }
 
+vk::raii::Buffer createVertexBuffer(const vk::raii::Device &device)
+{
+    vk::BufferCreateInfo createInfo{
+        .sType = vk::StructureType::eBufferCreateInfo,
+        .size = sizeof(vertices[0]) * vertices.size(),
+        .usage = vk::BufferUsageFlagBits::eVertexBuffer,
+        .sharingMode = vk::SharingMode::eExclusive};
+
+    return device.createBuffer(createInfo);
+}
+
+uint32_t findMemoryType(
+    const vk::raii::PhysicalDevice physicalDevice,
+    uint32_t typeFilter,
+    vk::MemoryPropertyFlags properties)
+{
+    auto memoryProperties = physicalDevice.getMemoryProperties();
+
+    for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; ++i)
+    {
+        if ((typeFilter & (1 << i)) && (memoryProperties.memoryTypes[i].propertyFlags & properties) == properties)
+        {
+            return i;
+        }
+    }
+    throw std::runtime_error("failed to find suitable memory type!");
+}
+
+vk::raii::DeviceMemory allocateBufferMemory(
+    const vk::raii::Device &device,
+    const vk::raii::PhysicalDevice &physicalDevice,
+    const vk::MemoryRequirements &memoryRequirements,
+    vk::MemoryPropertyFlags properties)
+{
+    vk::MemoryAllocateInfo allocInfo{
+        .sType = vk::StructureType::eMemoryAllocateInfo,
+        .allocationSize = memoryRequirements.size,
+        .memoryTypeIndex = findMemoryType(
+            physicalDevice,
+            memoryRequirements.memoryTypeBits,
+            properties),
+    };
+    return device.allocateMemory(allocInfo);
+}
+
 std::vector<vk::raii::Framebuffer> createFramebuffers(
     const vk::raii::Device &device,
     const std::vector<vk::raii::ImageView> &swapchainImageViews,
@@ -647,7 +699,6 @@ vk::raii::CommandBuffers createCommandBuffers(const vk::raii::Device &device, co
         .commandBufferCount = MAX_FRAMES_IN_FLIGHT,
     };
 
-    // TODO could be vector device.alloca... returns vector ?
     return vk::raii::CommandBuffers(device, allocateInfo);
 }
 
@@ -693,6 +744,22 @@ void Application::initVulkan()
     renderPass = createRenderPass(device, surfaceFormat.format);
     graphicsPipeline = createGraphicsPipeline(device, renderPass);
     swapChainFramebuffers = createFramebuffers(device, swapChainImageViews, renderPass, swapchainExtent);
+
+    vertexBuffer = createVertexBuffer(device);
+    vk::MemoryRequirements memoryRequirements = vertexBuffer.getMemoryRequirements();
+
+    vertexBufferMemory = allocateBufferMemory(
+        device,
+        physicalDevice,
+        memoryRequirements,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+
+    vertexBuffer.bindMemory(*vertexBufferMemory, 0);
+    auto data = vertexBufferMemory.mapMemory(0,
+                                             /*TODO should use buffer info size*/ memoryRequirements.size);
+    memcpy(data, vertices.data(), memoryRequirements.size);
+    vertexBufferMemory.unmapMemory();
+
     commandPool = createCommandPool(device, indices);
     commandBuffers = createCommandBuffers(device, commandPool);
 
@@ -759,6 +826,11 @@ void Application::recordCommandBuffer(const vk::raii::CommandBuffer &commandBuff
         .extent = swapchainExtent,
     };
     commandBuffer.setScissor(0, scissor);
+
+    std::array vertexBuffers{*vertexBuffer};
+    std::array<vk::DeviceSize, 1> offsets{0};
+
+    commandBuffer.bindVertexBuffers(0, vertexBuffers, offsets);
 
     commandBuffer.draw(3, 1, 0, 0);
 
