@@ -2,6 +2,10 @@
 
 #include <GLFW/glfw3.h>
 
+#define GLM_FORCE_RADIANS
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -12,6 +16,7 @@
 #include <iostream>
 #include <set>
 #include <unordered_map>
+#include <chrono>
 
 #include "application.hpp"
 
@@ -431,7 +436,11 @@ vk::raii::ShaderModule createShaderModule(const vk::raii::Device &device, const 
     return device.createShaderModule(createInfo);
 }
 
-vk::raii::Pipeline createGraphicsPipeline(const vk::raii::Device &device, const vk::raii::RenderPass &renderPass)
+vk::raii::Pipeline createGraphicsPipeline(
+    const vk::raii::Device &device,
+    const vk::raii::RenderPass &renderPass,
+    vk::raii::PipelineLayout &pipelineLayout,
+    const vk::raii::DescriptorSetLayout &descriptorSetLayout)
 {
     auto vertShaderCode = readFile("shaders/vert.spv");
     auto fragShaderCode = readFile("shaders/frag.spv");
@@ -498,7 +507,7 @@ vk::raii::Pipeline createGraphicsPipeline(const vk::raii::Device &device, const 
         .rasterizerDiscardEnable = VK_FALSE,
         .polygonMode = vk::PolygonMode::eFill,
         .cullMode = vk::CullModeFlagBits::eBack,
-        .frontFace = vk::FrontFace::eClockwise,
+        .frontFace = vk::FrontFace::eCounterClockwise,
         .depthBiasEnable = VK_FALSE,
         .lineWidth = 1.0f,
     };
@@ -534,9 +543,10 @@ vk::raii::Pipeline createGraphicsPipeline(const vk::raii::Device &device, const 
 
     vk::PipelineLayoutCreateInfo pipelineLayoutInfo{
         .sType = vk::StructureType::ePipelineLayoutCreateInfo,
-    };
+        .setLayoutCount = 1,
+        .pSetLayouts = &*descriptorSetLayout};
 
-    auto pipelineLayout = device.createPipelineLayout(pipelineLayoutInfo);
+     pipelineLayout = device.createPipelineLayout(pipelineLayoutInfo);
 
     vk::GraphicsPipelineCreateInfo pipelineInfo{
         .sType = vk::StructureType::eGraphicsPipelineCreateInfo,
@@ -738,6 +748,56 @@ void copyBuffer(
     queue.waitIdle();
 }
 
+vk::raii::DescriptorSetLayout createDescriptorSetLayout(const vk::raii::Device &device)
+{
+    vk::DescriptorSetLayoutBinding uboLayoutBinding{
+        .binding = 0,
+        .descriptorType = vk::DescriptorType::eUniformBuffer,
+        .descriptorCount = 1,
+        .stageFlags = vk::ShaderStageFlagBits::eVertex,
+    };
+
+    vk::DescriptorSetLayoutCreateInfo createInfo{
+        .sType = vk::StructureType::eDescriptorSetLayoutCreateInfo,
+        .bindingCount = 1,
+        .pBindings = &uboLayoutBinding,
+    };
+    return device.createDescriptorSetLayout(createInfo);
+}
+
+vk::raii::DescriptorPool createDescriptionPool(const vk::raii::Device &device)
+{
+    vk::DescriptorPoolSize poolSize{
+        .type = vk::DescriptorType::eUniformBuffer,
+        .descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT),
+    };
+
+    vk::DescriptorPoolCreateInfo poolInfo{
+        .sType = vk::StructureType::eDescriptorPoolCreateInfo,
+        .maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT),
+        .poolSizeCount = 1,
+        .pPoolSizes = &poolSize,
+    };
+
+    return device.createDescriptorPool(poolInfo);
+}
+
+vk::raii::DescriptorSets createDescriptorSets(
+    const vk::raii::Device &device,
+    const vk::raii::DescriptorPool &descriptorPool,
+    const vk::raii::DescriptorSetLayout &descriptorSetLayout)
+{
+    std::vector<vk::DescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, *descriptorSetLayout);
+    vk::DescriptorSetAllocateInfo allocInfo{
+        .sType = vk::StructureType::eDescriptorSetAllocateInfo,
+        .descriptorPool = *descriptorPool,
+        .descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT),
+        .pSetLayouts = layouts.data(),
+    };
+
+    return vk::raii::DescriptorSets(device, allocInfo);
+}
+
 void Application::run()
 {
     initWindow();
@@ -763,25 +823,28 @@ void Application::initVulkan()
     surface = createSurface(instance, window);
     physicalDevice = pickPhysicalDevice(instance, surface);
 
-    /*auto*/ indices = findQueueFamilies(physicalDevice, surface);
+    /*auto*/ familyIndices = findQueueFamilies(physicalDevice, surface);
 
-    device = createLogicalDevice(physicalDevice, indices);
+    device = createLogicalDevice(physicalDevice, familyIndices);
 
-    graphicsQueue = device.getQueue(indices.graphicsFamily.value(), 0);
-    presentQueue = device.getQueue(indices.presentFamily.value(), 0);
+    graphicsQueue = device.getQueue(familyIndices.graphicsFamily.value(), 0);
+    presentQueue = device.getQueue(familyIndices.presentFamily.value(), 0);
 
     auto swapChainSupport = querySwapChainSupport(physicalDevice, surface);
     auto surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     swapchainExtent = chooseSwapExtent(window, swapChainSupport.capabilities);
 
-    swapchain = createSwapChain(device, surface, surfaceFormat, swapchainExtent, swapChainSupport, indices);
+    swapchain = createSwapChain(device, surface, surfaceFormat, swapchainExtent, swapChainSupport, familyIndices);
 
     swapChainImageViews = createImageViews(device, swapchain.getImages(), surfaceFormat.format);
     renderPass = createRenderPass(device, surfaceFormat.format);
-    graphicsPipeline = createGraphicsPipeline(device, renderPass);
+
+    descriptorSetLayout = createDescriptorSetLayout(device);
+
+    graphicsPipeline = createGraphicsPipeline(device, renderPass, pipelineLayout ,descriptorSetLayout);
     swapChainFramebuffers = createFramebuffers(device, swapChainImageViews, renderPass, swapchainExtent);
 
-    commandPool = createCommandPool(device, indices);
+    commandPool = createCommandPool(device, familyIndices);
 
     auto stagingBuffer = device.createBuffer({
         .sType = vk::StructureType::eBufferCreateInfo,
@@ -789,27 +852,26 @@ void Application::initVulkan()
         .usage = vk::BufferUsageFlagBits::eTransferSrc,
         .sharingMode = vk::SharingMode::eExclusive,
     });
-    auto stagingMemRequirements = stagingBuffer.getMemoryRequirements();
+    auto memoryRequirements = stagingBuffer.getMemoryRequirements();
     auto stagingBufferMemory = allocateBufferMemory(
         device,
         physicalDevice,
-        stagingMemRequirements,
+        memoryRequirements,
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
 
     stagingBuffer.bindMemory(*stagingBufferMemory, 0);
 
-    auto data = stagingBufferMemory.mapMemory(0, stagingMemRequirements.size);
-    memcpy(data, vertices.data(), stagingMemRequirements.size);
+    auto data = stagingBufferMemory.mapMemory(0, memoryRequirements.size);
+    memcpy(data, vertices.data(), memoryRequirements.size);
     stagingBufferMemory.unmapMemory();
 
     vertexBuffer = device.createBuffer({
         .sType = vk::StructureType::eBufferCreateInfo,
         .size = sizeof(vertices[0]) * vertices.size(),
         .usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer,
-        .sharingMode = vk::SharingMode::eExclusive,
     });
 
-    vk::MemoryRequirements memoryRequirements = vertexBuffer.getMemoryRequirements();
+    memoryRequirements = vertexBuffer.getMemoryRequirements();
 
     vertexBufferMemory = allocateBufferMemory(
         device,
@@ -821,10 +883,91 @@ void Application::initVulkan()
 
     copyBuffer(device, commandPool, graphicsQueue, stagingBuffer, vertexBuffer, memoryRequirements.size);
 
-    //  data = vertexBufferMemory.mapMemory(0,
-    //                                          /*TODO should use buffer info size*/ memoryRequirements.size);
-    // memcpy(data, vertices.data(), memoryRequirements.size);
-    // vertexBufferMemory.unmapMemory();
+    stagingBuffer = device.createBuffer({
+        .sType = vk::StructureType::eBufferCreateInfo,
+        .size = sizeof(indices[0]) * indices.size(),
+        .usage = vk::BufferUsageFlagBits::eTransferSrc,
+    });
+    memoryRequirements = stagingBuffer.getMemoryRequirements();
+    stagingBufferMemory = allocateBufferMemory(
+        device,
+        physicalDevice,
+        memoryRequirements,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+
+    stagingBuffer.bindMemory(*stagingBufferMemory, 0);
+
+    data = stagingBufferMemory.mapMemory(0, memoryRequirements.size);
+    memcpy(data, indices.data(), memoryRequirements.size);
+    stagingBufferMemory.unmapMemory();
+
+    indexBuffer = device.createBuffer({
+
+        .sType = vk::StructureType::eBufferCreateInfo,
+        .size = sizeof(indices[0]) * indices.size(),
+        .usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer,
+    });
+    memoryRequirements = vertexBuffer.getMemoryRequirements();
+
+    indexBufferMemory = allocateBufferMemory(
+        device,
+        physicalDevice,
+        memoryRequirements,
+        vk::MemoryPropertyFlagBits::eDeviceLocal);
+
+    indexBuffer.bindMemory(*indexBufferMemory, 0);
+
+    copyBuffer(device, commandPool, graphicsQueue, stagingBuffer, indexBuffer, memoryRequirements.size);
+
+    uniformBuffers.reserve(MAX_FRAMES_IN_FLIGHT);
+    uniformBuffersMemory.reserve(MAX_FRAMES_IN_FLIGHT);
+    uniformBuffersMapped.reserve(MAX_FRAMES_IN_FLIGHT);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        auto buffer = device.createBuffer({
+            .sType = vk::StructureType::eBufferCreateInfo,
+            .size = sizeof(UniformBufferObject),
+            .usage = vk::BufferUsageFlagBits::eUniformBuffer,
+        });
+        memoryRequirements = buffer.getMemoryRequirements();
+        auto bufferMemory = allocateBufferMemory(
+            device,
+            physicalDevice,
+            memoryRequirements,
+            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+
+        buffer.bindMemory(*bufferMemory, 0);
+        data = bufferMemory.mapMemory(0, memoryRequirements.size);
+
+        uniformBuffers.push_back(std::move(buffer));
+        uniformBuffersMemory.push_back(std::move(bufferMemory));
+        uniformBuffersMapped.push_back(std::move(data));
+    }
+
+    descriptionPool = createDescriptionPool(device);
+    descriptorSets = createDescriptorSets(device, descriptionPool, descriptorSetLayout);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        vk::DescriptorBufferInfo bufferInfo{
+            .buffer = *uniformBuffers[i],
+            .offset = 0,
+            .range = sizeof(UniformBufferObject),
+        };
+
+        vk::WriteDescriptorSet descriptorWrite{
+            .sType = vk::StructureType::eWriteDescriptorSet,
+            .dstSet = *descriptorSets[i],
+            .dstBinding = 0,
+            .dstArrayElement = 0,
+            .descriptorCount = 1,
+            .descriptorType = vk::DescriptorType::eUniformBuffer,
+            .pBufferInfo = &bufferInfo,
+        };
+
+        device.updateDescriptorSets(descriptorWrite, nullptr);
+    }
 
     commandBuffers = createCommandBuffers(device, commandPool);
 
@@ -851,7 +994,9 @@ void Application::cleanup()
     glfwTerminate();
 }
 
-void Application::recordCommandBuffer(const vk::raii::CommandBuffer &commandBuffer, uint32_t imageIndex)
+void Application::recordCommandBuffer(
+    const vk::raii::CommandBuffer &commandBuffer, 
+    uint32_t imageIndex, uint32_t currentFrame)
 {
     vk::CommandBufferBeginInfo beginInfo{
         .sType = vk::StructureType::eCommandBufferBeginInfo,
@@ -897,7 +1042,13 @@ void Application::recordCommandBuffer(const vk::raii::CommandBuffer &commandBuff
 
     commandBuffer.bindVertexBuffers(0, vertexBuffers, offsets);
 
-    commandBuffer.draw(3, 1, 0, 0);
+    commandBuffer.bindIndexBuffer(*indexBuffer, 0, vk::IndexType::eUint16);
+
+    commandBuffer.bindDescriptorSets(
+        vk::PipelineBindPoint::eGraphics, 
+        *pipelineLayout,0, {*descriptorSets[currentFrame]}, nullptr);
+    commandBuffer.drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+    // commandBuffer.draw(3, 1, 0, 0);
 
     commandBuffer.endRenderPass();
 
@@ -928,10 +1079,12 @@ void Application::drawFrame(uint32_t currentFrame)
         throw std::runtime_error("failed to acquire swap chain image!");
     }
 
+    updateUniformBuffer(currentFrame);
+
     device.resetFences(*inFlightFence);
 
     commandBuffer.reset();
-    recordCommandBuffer(commandBuffer, imageIndex);
+    recordCommandBuffer(commandBuffer, imageIndex, currentFrame);
 
     std::array waitSephamores{*imageAvailableSemaphore};
     std::array<vk::PipelineStageFlags, waitSephamores.size()> waitStages{vk::PipelineStageFlagBits::eColorAttachmentOutput};
@@ -939,6 +1092,7 @@ void Application::drawFrame(uint32_t currentFrame)
     std::array signalSephamores{
         *renderFinishedSemaphore,
     };
+
 
     vk::SubmitInfo submitInfo{
         .sType = vk::StructureType::eSubmitInfo,
@@ -1012,8 +1166,27 @@ void Application::recreateSwapchain()
 
     //  std::clog << swapchainExtent.width << " " << swapchainExtent.height << std::endl;
 
-    swapchain = createSwapChain(device, surface, surfaceFormat, swapchainExtent, swapChainSupport, indices);
+    swapchain = createSwapChain(device, surface, surfaceFormat, swapchainExtent, swapChainSupport, familyIndices);
 
     swapChainImageViews = createImageViews(device, swapchain.getImages(), surfaceFormat.format);
     swapChainFramebuffers = createFramebuffers(device, swapChainImageViews, renderPass, swapchainExtent);
+}
+
+void Application::updateUniformBuffer(uint32_t currentImage)
+{
+    static auto startTime = std::chrono::high_resolution_clock::now();
+
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+    UniformBufferObject ubo{};
+    ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+    ubo.proj = glm::perspective(glm::radians(45.0f), swapchainExtent.width / (float)swapchainExtent.height, 0.1f, 10.0f);
+
+    ubo.proj[1][1] *= -1;
+
+    memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }

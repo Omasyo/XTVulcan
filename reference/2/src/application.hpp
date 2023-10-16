@@ -77,11 +77,20 @@ struct Vertex
     }
 };
 
-const std::vector<Vertex> vertices = {
-    {{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},
-    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+struct UniformBufferObject
+{
+    alignas(16) glm::mat4 model;
+    alignas(16) glm::mat4 view;
+    alignas(16) glm::mat4 proj;
 };
+
+const std::vector<Vertex> vertices = {
+    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
+
+const std::vector<uint16_t> indices = {0, 1, 2, 2, 3, 0};
 
 class Application
 {
@@ -97,13 +106,15 @@ private:
 
     void cleanup();
 
-    void recordCommandBuffer(const vk::raii::CommandBuffer &commandBuffer, uint32_t imageIndex);
+    void recordCommandBuffer(const vk::raii::CommandBuffer &commandBuffer, uint32_t imageIndex, uint32_t currentFrame);
 
     void recreateSwapchain();
 
     void drawFrame(uint32_t currentFrame);
 
     void initSyncObjects();
+
+    void updateUniformBuffer(uint32_t currentImage);
 
     GLFWwindow *window;
 
@@ -128,7 +139,7 @@ private:
     vk::Extent2D swapchainExtent;
     std::vector<vk::raii::ImageView> swapChainImageViews;
 
-    QueueFamilyIndices indices;
+    QueueFamilyIndices familyIndices;
 
     vk::raii::RenderPass renderPass{nullptr};
 
@@ -144,5 +155,16 @@ private:
 
     vk::raii::Buffer vertexBuffer{nullptr};
     vk::raii::DeviceMemory vertexBufferMemory{nullptr};
+    vk::raii::Buffer indexBuffer{nullptr};
+    vk::raii::DeviceMemory indexBufferMemory{nullptr};
     // uint32_t currentFrame = 0;
+
+    std::vector<vk::raii::Buffer> uniformBuffers;
+    std::vector<vk::raii::DeviceMemory> uniformBuffersMemory;
+    std::vector<void *> uniformBuffersMapped;
+
+    vk::raii::DescriptorSetLayout descriptorSetLayout{nullptr};
+    vk::raii::PipelineLayout pipelineLayout{nullptr};
+    vk::raii::DescriptorPool descriptionPool{nullptr};
+    vk::raii::DescriptorSets descriptorSets{nullptr};
 };
