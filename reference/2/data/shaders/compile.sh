@@ -1,3 +1,3 @@
-mkdir build
-glslc shader.vert -o build/vert.spv
-glslc shader.frag -o build/frag.spv
+mkdir shaders
+glslc shader.vert -o shaders/vert.spv
+glslc shader.frag -o shaders/frag.spv

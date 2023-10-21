@@ -12,15 +12,8 @@ target_compile_features(build-debug PRIVATE cxx_std_20)
 target_compile_features(application PRIVATE cxx_std_20)
 target_link_libraries(build-debug PRIVATE -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi)
 
-set(SHADER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data/shaders)
+set(SHADER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shaders)
 set(SHADER_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/shaders)
-
-add_custom_target(CShaders
-  mkdir ${SHADER_BINARY_DIR}
-  COMMAND glslc ${SHADER_SOURCE_DIR}/shader.vert -o ${SHADER_BINARY_DIR}/vert.spv
-  COMMAND glslc ${SHADER_SOURCE_DIR}/shader.frag -o ${SHADER_BINARY_DIR}/frag.spv
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data/shaders/
-)
 
 file(GLOB SHADERS
   ${SHADER_SOURCE_DIR}/*.vert
