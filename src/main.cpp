@@ -1,7 +1,17 @@
 #include <iostream>
 
+#include "application.hpp"
+
 int main() {
-    std::cout << "Hello new world" << std::endl;
+    Application app;
+    // glfwCreateWindowSurface();
+
+    try {
+        app.run();
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 
     return 0;
 }

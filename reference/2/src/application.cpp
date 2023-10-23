@@ -96,7 +96,8 @@ vk::raii::Instance createInstance(const vk::raii::Context &context)
         .applicationVersion = 1,
         .pEngineName = "No Engine",
         .engineVersion = 1,
-        .apiVersion = VK_API_VERSION_1_0};
+        .apiVersion = VK_API_VERSION_1_0,
+    };
 
     vk::InstanceCreateInfo createInfo{
         .sType = vk::StructureType::eInstanceCreateInfo,
@@ -546,7 +547,7 @@ vk::raii::Pipeline createGraphicsPipeline(
         .setLayoutCount = 1,
         .pSetLayouts = &*descriptorSetLayout};
 
-     pipelineLayout = device.createPipelineLayout(pipelineLayoutInfo);
+    pipelineLayout = device.createPipelineLayout(pipelineLayoutInfo);
 
     vk::GraphicsPipelineCreateInfo pipelineInfo{
         .sType = vk::StructureType::eGraphicsPipelineCreateInfo,
@@ -841,7 +842,7 @@ void Application::initVulkan()
 
     descriptorSetLayout = createDescriptorSetLayout(device);
 
-    graphicsPipeline = createGraphicsPipeline(device, renderPass, pipelineLayout ,descriptorSetLayout);
+    graphicsPipeline = createGraphicsPipeline(device, renderPass, pipelineLayout, descriptorSetLayout);
     swapChainFramebuffers = createFramebuffers(device, swapChainImageViews, renderPass, swapchainExtent);
 
     commandPool = createCommandPool(device, familyIndices);
@@ -995,7 +996,7 @@ void Application::cleanup()
 }
 
 void Application::recordCommandBuffer(
-    const vk::raii::CommandBuffer &commandBuffer, 
+    const vk::raii::CommandBuffer &commandBuffer,
     uint32_t imageIndex, uint32_t currentFrame)
 {
     vk::CommandBufferBeginInfo beginInfo{
@@ -1045,8 +1046,8 @@ void Application::recordCommandBuffer(
     commandBuffer.bindIndexBuffer(*indexBuffer, 0, vk::IndexType::eUint16);
 
     commandBuffer.bindDescriptorSets(
-        vk::PipelineBindPoint::eGraphics, 
-        *pipelineLayout,0, {*descriptorSets[currentFrame]}, nullptr);
+        vk::PipelineBindPoint::eGraphics,
+        *pipelineLayout, 0, {*descriptorSets[currentFrame]}, nullptr);
     commandBuffer.drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
     // commandBuffer.draw(3, 1, 0, 0);
 
@@ -1092,7 +1093,6 @@ void Application::drawFrame(uint32_t currentFrame)
     std::array signalSephamores{
         *renderFinishedSemaphore,
     };
-
 
     vk::SubmitInfo submitInfo{
         .sType = vk::StructureType::eSubmitInfo,
