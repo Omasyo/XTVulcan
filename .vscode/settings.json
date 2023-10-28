@@ -57,6 +57,7 @@
         "cinttypes": "cpp",
         "map": "cpp",
         "chrono": "cpp",
-        "ranges": "cpp"
+        "ranges": "cpp",
+        "unordered_set": "cpp"
     }
 }
