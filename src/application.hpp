@@ -167,6 +167,7 @@ private:
             glfwPollEvents();
             drawFrame();
         }
+        logicalDevice.waitIdle();
     }
 
     void cleanup()
@@ -268,7 +269,7 @@ private:
     {
         auto properties = physicalDevice.getQueueFamilyProperties();
 
-        queueFamilyIndices = getQueueFamilyIndices(properties, vk::QueueFlagBits::eGraphics);
+        queueFamilyIndices = getQueueFamilyIndices(properties);
         // queueFamilyIndices.presentFamily = getQueueFamilyIndex(properties, vk::QueueFlagBits::eTransfer);
 
         float priority = 1.0f;
@@ -287,7 +288,7 @@ private:
         vk::PhysicalDeviceFeatures deviceFeatures{};
 
         vk::DeviceCreateInfo deviceCreateInfo{
-            .queueCreateInfoCount = deviceQueueCreateInfos.size(),
+            .queueCreateInfoCount = static_cast<uint32_t>(deviceQueueCreateInfos.size()),
             .pQueueCreateInfos = deviceQueueCreateInfos.data(),
             .enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size()),
             .ppEnabledExtensionNames = deviceExtensions.data(),
@@ -302,8 +303,7 @@ private:
     }
 
     QueueFamilyIndices getQueueFamilyIndices(
-        const std::vector<vk::QueueFamilyProperties> &properties,
-        vk::QueueFlags queueFlags)
+        const std::vector<vk::QueueFamilyProperties> &properties)
     {
         QueueFamilyIndices indices{UINT32_MAX, UINT32_MAX};
         for (uint32_t i = 0; i < properties.size(); ++i)
@@ -320,6 +320,8 @@ private:
 
             if (indices.graphicsFamily != UINT32_MAX && indices.presentFamily != UINT32_MAX)
             {
+                        std::cout << "Indices are " << indices.graphicsFamily << " " << indices.graphicsFamily << std::endl;
+
                 return indices;
             }
         }
