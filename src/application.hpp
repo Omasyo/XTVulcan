@@ -576,6 +576,8 @@ private:
     void createFrameBuffers()
     {
         // TODO do i clear swapchainbuffers first
+        std::vector<vk::raii::Framebuffer> buffers;
+
         swapchainFrameBuffers.clear();
         swapchainFrameBuffers.reserve(swapchainImageViews.size());
 
