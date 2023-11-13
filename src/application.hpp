@@ -386,7 +386,7 @@ private:
             .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
             .presentMode = presentMode,
             .clipped = VK_TRUE,
-            // .oldSwapchain = nullptr
+            .oldSwapchain = *swapchain
         };
 
         std::array indices = {queueFamilyIndices.graphicsFamily, queueFamilyIndices.presentFamily};
@@ -404,6 +404,7 @@ private:
 
         auto swapchainImages = swapchain.getImages();
 
+        swapchainImageViews.clear();
         swapchainImageViews.reserve(swapchainImages.size());
         for (auto &&image : swapchainImages)
         {
@@ -575,6 +576,7 @@ private:
     void createFrameBuffers()
     {
         // TODO do i clear swapchainbuffers first
+        swapchainFrameBuffers.clear();
         swapchainFrameBuffers.reserve(swapchainImageViews.size());
 
         for (auto &&imageViews : swapchainImageViews)
