@@ -949,7 +949,10 @@ private:
 
     void createDescriptorPool()
     {
-        vk::DescriptorPoolSize poolSize{.descriptorCount = MAX_FRAMES_IN_FLIGHT};
+        vk::DescriptorPoolSize poolSize{
+            .type = vk::DescriptorType::eUniformBuffer,
+            .descriptorCount = MAX_FRAMES_IN_FLIGHT,
+            };
 
         descriptorPool = logicalDevice.createDescriptorPool({
             .maxSets = MAX_FRAMES_IN_FLIGHT,
