@@ -8,6 +8,9 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_vulkan.h>
 
 #include <algorithm>
 #include <array>
@@ -45,9 +48,9 @@ struct QueueFamilyIndices
 
 struct UniformBufferObject
 {
-    glm::mat4 model;
-    glm::mat4 view;
-    glm::mat4 proj;
+   alignas(16) glm::mat4 model;
+   alignas(16) glm::mat4 view;
+   alignas(16) glm::mat4 proj;
 };
 
 struct Vertex
@@ -955,6 +958,7 @@ private:
             };
 
         descriptorPool = logicalDevice.createDescriptorPool({
+            .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
             .maxSets = MAX_FRAMES_IN_FLIGHT,
             .poolSizeCount = 1,
             .pPoolSizes = &poolSize,

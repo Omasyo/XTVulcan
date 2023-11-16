@@ -5,6 +5,7 @@ project(XTVulkan)
 include_directories(
   external/glm
   external/imgui
+  external/imgui/backends
   src
 )
 
