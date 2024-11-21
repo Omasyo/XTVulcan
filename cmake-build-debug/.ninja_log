@@ -1,0 +1,14 @@
+# ninja log v5
+21	5455	1700392038156227241	CMakeFiles/build-debug.dir/external/imgui/imgui_demo.cpp.o	135331e91d17657b
+7	8592	1700392041288227340	CMakeFiles/build-debug.dir/external/imgui/imgui.cpp.o	58edcdd5936c4ac4
+5456	9728	1700392042416227376	CMakeFiles/build-debug.dir/external/imgui/imgui_draw.cpp.o	dcd264924d17f86b
+8593	12815	1700392045516227474	CMakeFiles/build-debug.dir/external/imgui/imgui_tables.cpp.o	1169078c97d2ef8e
+12815	13378	1700392046080227492	CMakeFiles/build-debug.dir/external/imgui/backends/imgui_impl_glfw.cpp.o	d62f066fd77c6944
+13378	14001	1700392046704227512	CMakeFiles/build-debug.dir/external/imgui/backends/imgui_impl_vulkan.cpp.o	b6a561913289ed66
+9729	15371	1700392048068227555	CMakeFiles/build-debug.dir/external/imgui/imgui_widgets.cpp.o	d11737ea0c60b97f
+0	21298	1700392053984227743	CMakeFiles/build-debug.dir/src/main.cpp.o	b1e7c38ae2f83499
+21299	21889	1700392054588227762	build-debug	c5e3adf5ba726dfa
+5	19976	1700392897660254507	CMakeFiles/build-debug.dir/src/main.cpp.o	b1e7c38ae2f83499
+19977	20342	1700392898036254519	build-debug	c5e3adf5ba726dfa
+2	22778	1700393080824260318	CMakeFiles/build-debug.dir/src/main.cpp.o	b1e7c38ae2f83499
+22780	23230	1700393081288260332	build-debug	c5e3adf5ba726dfa

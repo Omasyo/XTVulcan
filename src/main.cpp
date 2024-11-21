@@ -1,12 +1,12 @@
 #include <iostream>
 #include <glm/glm.hpp>
 
+#include <imgui.h>
 
 #include "application.hpp"
 
 int main() {
     Application app;
-    // glfwCreateWindowSurface();
 
     try {
         app.run();

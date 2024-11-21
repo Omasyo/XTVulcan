@@ -1,0 +1,5 @@
+/home/omaka/Documents/GitHub/XTVulcan/cmake-build-debug/CMakeFiles/build-debug.dir
+/home/omaka/Documents/GitHub/XTVulcan/cmake-build-debug/CMakeFiles/create-textures.dir
+/home/omaka/Documents/GitHub/XTVulcan/cmake-build-debug/CMakeFiles/CShaders.dir
+/home/omaka/Documents/GitHub/XTVulcan/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/omaka/Documents/GitHub/XTVulcan/cmake-build-debug/CMakeFiles/rebuild_cache.dir

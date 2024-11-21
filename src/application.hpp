@@ -12,6 +12,9 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -48,9 +51,9 @@ struct QueueFamilyIndices
 
 struct UniformBufferObject
 {
-   alignas(16) glm::mat4 model;
-   alignas(16) glm::mat4 view;
-   alignas(16) glm::mat4 proj;
+    alignas(16) glm::mat4 model;
+    alignas(16) glm::mat4 view;
+    alignas(16) glm::mat4 proj;
 };
 
 struct Vertex
@@ -124,6 +127,59 @@ public:
     {
         initWindow();
         initVulkan();
+
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO &io = ImGui::GetIO();
+        (void)io;
+
+        ImGui_ImplGlfw_InitForVulkan(window, true);
+        ImGui_ImplVulkan_InitInfo initInfo = {
+            .Instance = *instance,
+            .PhysicalDevice = *physicalDevice,
+            .Device = *logicalDevice,
+            .QueueFamily = queueFamilyIndices.graphicsFamily,
+            .Queue = *graphicsQueue,
+            .DescriptorPool = *descriptorPool,
+            .MinImageCount = MAX_FRAMES_IN_FLIGHT,
+            .ImageCount = MAX_FRAMES_IN_FLIGHT,
+        };
+
+        vk::AttachmentDescription attachmentDescription{
+            .format = swapchainFormat,
+            .samples = vk::SampleCountFlagBits::e1,
+            .loadOp = vk::AttachmentLoadOp::eLoad,
+            .storeOp = vk::AttachmentStoreOp::eStore,
+            .stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
+            .stencilStoreOp = vk::AttachmentStoreOp::eDontCare,
+            .initialLayout = vk::ImageLayout::eColorAttachmentOptimal,
+            .finalLayout = vk::ImageLayout::ePresentSrcKHR,
+        };
+
+        vk::AttachmentReference attachmentReference{
+            .attachment = 0,
+            .layout = vk::ImageLayout::eColorAttachmentOptimal};
+
+        vk::SubpassDescription subpass{
+            .pipelineBindPoint = vk::PipelineBindPoint::eGraphics,
+            .colorAttachmentCount = 1,
+            .pColorAttachments = &attachmentReference};
+
+        vk::SubpassDependency subpassDependency{
+            // .srcSubpass = VK_SUBPASS_EXTERNAL,
+            .srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
+            .dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
+            // .srcAccessMask = 0,
+            .dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite,
+        };
+
+        auto imguiRenderPass = logicalDevice.createRenderPass({.attachmentCount = 1,
+                                                               .pAttachments = &attachmentDescription,
+                                                               .subpassCount = 1,
+                                                               .pSubpasses = &subpass,
+                                                               .dependencyCount = 1,
+                                                               .pDependencies = &subpassDependency});
+
         mainLoop();
         cleanup();
     }
@@ -187,6 +243,9 @@ private:
     std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
     std::vector<vk::raii::Fence> inFlightFences;
 
+    vk::raii::Image textureImage{nullptr};
+    vk::raii::DeviceMemory textureImageMemory{nullptr};
+
     uint32_t currentFrame = 0;
 
     void initWindow()
@@ -222,6 +281,7 @@ private:
             .queueFamilyIndex = queueFamilyIndices.graphicsFamily,
         });
 
+        createTextureImage();
         createVertexBuffer();
         createIndexBuffer();
         createUniformBuffers();
@@ -265,6 +325,11 @@ private:
     {
         auto availableLayers = context.enumerateInstanceLayerProperties();
         bool allLayersSupported = true;
+
+        for (auto layer : availableLayers)
+        {
+            std::cout << layer.layerName << std::endl;
+        }
 
         for (auto layer : validationLayers)
         {
@@ -837,7 +902,7 @@ private:
         return std::make_pair(std::move(buffer), std::move(memory));
     }
 
-    void copyBuffer(const vk::raii::Buffer &srcBuffer, const vk::raii::Buffer &dstBuffer, vk::DeviceSize size)
+    void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size)
     {
         vk::CommandBufferAllocateInfo allocateInfo{
             .commandPool = *commandPool,
@@ -849,7 +914,7 @@ private:
         auto &commandBuffer = commandBuffers.front();
 
         commandBuffer.begin({.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
-        commandBuffer.copyBuffer(*srcBuffer, *dstBuffer, vk::BufferCopy{.size = size});
+        commandBuffer.copyBuffer(srcBuffer, dstBuffer, vk::BufferCopy{.size = size});
         commandBuffer.end();
 
         graphicsQueue.submit({vk::SubmitInfo{
@@ -877,7 +942,7 @@ private:
             vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer,
             vk::MemoryPropertyFlagBits::eDeviceLocal);
 
-        copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+        copyBuffer(*stagingBuffer, *vertexBuffer, bufferSize);
     }
 
     void createIndexBuffer()
@@ -898,7 +963,7 @@ private:
             vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer,
             vk::MemoryPropertyFlagBits::eDeviceLocal);
 
-        copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+        copyBuffer(*stagingBuffer, *indexBuffer, bufferSize);
     }
 
     void createDescriptorSetLayout()
@@ -955,7 +1020,7 @@ private:
         vk::DescriptorPoolSize poolSize{
             .type = vk::DescriptorType::eUniformBuffer,
             .descriptorCount = MAX_FRAMES_IN_FLIGHT,
-            };
+        };
 
         descriptorPool = logicalDevice.createDescriptorPool({
             .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
@@ -994,5 +1059,166 @@ private:
 
             logicalDevice.updateDescriptorSets({descriptorWrite}, nullptr);
         }
+    }
+
+    void createTextureImage()
+    {
+        int texWidth, texHeight, texChannels;
+        stbi_uc *pixels = stbi_load("textures/comicsnac.png", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+
+        vk::DeviceSize imageSize = texWidth * texHeight * 4;
+
+        if (!pixels)
+        {
+            throw std::runtime_error("failed to load texture image!");
+        }
+
+        auto [stagingBuffer, stagingBufferMemory] = createBuffer(
+            imageSize,
+            vk::BufferUsageFlagBits::eTransferSrc,
+            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+
+        auto data = stagingBufferMemory.mapMemory(0, imageSize);
+        memcpy(data, pixels, imageSize);
+        stagingBufferMemory.unmapMemory();
+
+        stbi_image_free(pixels);
+        std::tie(textureImage, textureImageMemory) =
+            createImage(texWidth, texHeight, vk::Format::eR8G8B8A8Srgb,
+                        vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
+                        vk::MemoryPropertyFlagBits::eDeviceLocal);
+
+        transitionImageLayout(*textureImage, vk::Format::eR8G8B8A8Srgb, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+        copyBufferToImage(*stagingBuffer, *textureImage, texWidth, texHeight);
+        transitionImageLayout(*textureImage, vk::Format::eR8G8B8A8Srgb, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
+    }
+
+    std::pair<vk::raii::Image, vk::raii::DeviceMemory> createImage(
+        uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling,
+        vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties)
+    {
+        auto image = logicalDevice.createImage({
+            .imageType = vk::ImageType::e2D,
+            .format = format,
+            .extent = {
+                .width = width,
+                .height = height,
+                .depth = 1,
+            },
+            .mipLevels = 1,
+            .arrayLayers = 1,
+            .samples = vk::SampleCountFlagBits::e1,
+            .tiling = tiling,
+            .usage = usage,
+            .sharingMode = vk::SharingMode::eExclusive,
+            .initialLayout = vk::ImageLayout::eUndefined,
+        });
+
+        auto memoryRequirements = image.getMemoryRequirements();
+
+        vk::MemoryAllocateInfo allocateInfo{
+            .allocationSize = memoryRequirements.size,
+            .memoryTypeIndex = findMemoryType(memoryRequirements.memoryTypeBits, properties),
+        };
+
+        auto imageMemory = logicalDevice.allocateMemory(allocateInfo, nullptr);
+
+        image.bindMemory(*imageMemory, 0);
+
+        return std::make_pair(std::move(image), std::move(imageMemory));
+    }
+
+    void transitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout)
+    {
+
+        auto commandBuffers = logicalDevice.allocateCommandBuffers({
+            .commandPool = *commandPool,
+            .level = vk::CommandBufferLevel::ePrimary,
+            .commandBufferCount = 1,
+        });
+        auto &commandBuffer = commandBuffers.front();
+
+        commandBuffer.begin({.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+
+        vk::AccessFlags sourceAccessMask;
+        vk::AccessFlags destinationAccessMask;
+        vk::PipelineStageFlags sourceStage;
+        vk::PipelineStageFlags destinationStage;
+
+        if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eTransferDstOptimal)
+        {
+            sourceAccessMask = vk::AccessFlagBits::eNone;
+            destinationAccessMask = vk::AccessFlagBits::eTransferWrite;
+            sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+            destinationStage = vk::PipelineStageFlagBits::eTransfer;
+        }
+        else if (oldLayout == vk::ImageLayout::eTransferDstOptimal && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
+        {
+            sourceAccessMask = vk::AccessFlagBits::eTransferWrite;
+            destinationAccessMask = vk::AccessFlagBits::eShaderRead;
+            sourceStage = vk::PipelineStageFlagBits::eTransfer;
+            destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
+        }
+        else
+        {
+            throw std::invalid_argument("unsupported layout transition!");
+        }
+
+        vk::ImageMemoryBarrier barrier{
+            .srcAccessMask = sourceAccessMask,
+            .dstAccessMask = destinationAccessMask,
+            .oldLayout = oldLayout,
+            .newLayout = newLayout,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .image = image,
+            .subresourceRange = {
+                .aspectMask = vk::ImageAspectFlagBits::eColor,
+                .baseMipLevel = 0,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
+            },
+        };
+
+        commandBuffer.pipelineBarrier(sourceStage, destinationStage, {}, nullptr, nullptr, barrier);
+
+        commandBuffer.end();
+
+        graphicsQueue.submit({vk::SubmitInfo{
+            .commandBufferCount = 1,
+            .pCommandBuffers = &*commandBuffer,
+        }});
+        graphicsQueue.waitIdle();
+    }
+
+    void copyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height)
+    {
+
+        auto commandBuffers = logicalDevice.allocateCommandBuffers({
+            .commandPool = *commandPool,
+            .level = vk::CommandBufferLevel::ePrimary,
+            .commandBufferCount = 1,
+        });
+        auto &commandBuffer = commandBuffers.front();
+
+        commandBuffer.begin({.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+
+        vk::BufferImageCopy region{
+            .bufferOffset = 0,
+            .bufferRowLength = 0,
+            .bufferImageHeight = 0,
+            .imageSubresource = {
+                .aspectMask = vk::ImageAspectFlagBits::eColor,
+                .mipLevel = 0,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
+            },
+            .imageOffset = {0, 0, 0},
+            .imageExtent = {width, height, 1},
+        };
+
+        commandBuffer.copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal, region);
+
+        commandBuffer.end();
     }
 };

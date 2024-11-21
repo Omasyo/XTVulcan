@@ -1,0 +1,78 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.19"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "XTVulkan",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "CShaders::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-CShaders-Debug-13696fb61383834b53c5.json",
+					"name" : "CShaders",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "build-debug::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-build-debug-Debug-ed3c4217d9a04bff424f.json",
+					"name" : "build-debug",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "create-textures::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-create-textures-Debug-0001c5f1f9a1259d399c.json",
+					"name" : "create-textures",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/omaka/Documents/GitHub/XTVulcan/cmake-build-debug",
+		"source" : "/home/omaka/Documents/GitHub/XTVulcan"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}
